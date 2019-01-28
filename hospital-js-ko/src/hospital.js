@@ -75,7 +75,7 @@ class Hospital {
     }
 
     // CI 유효성 확인
-    const ci = user.certificate.getCertification().getPersonCi();
+    const ci = user.certificate.certification.personCi;
     if (!Hospital.isValidCI(ci, user.residentRegistrationNumber)) {
       throw new Error('주어진 CI 는 해당 주민등록번호의 CI 가 아닙니다.');
     }
@@ -83,7 +83,7 @@ class Hospital {
     // 환자 ID 와 블록체인 account 연계
     const patient = this.findPatientWithRRN(user.residentRegistrationNumber);
     if (patient != null) {
-      patient.blockchainAddress = user.blockchainAddress;
+      patient.blockchainAddress = user.getAddress();
     } else {
       throw new Error(`주민등록번호가 ${patient.residentRegistrationNumber} 인 환자 정보를 찾을 수 없습니다.`);
     }
@@ -215,7 +215,7 @@ class Hospital {
 
     try {
       // 블록체인에 기록 된 인증서 hash 값
-      return medjs.client.getTransaction(certificateTxHash)
+      return medjs.client.getTransaction(certificateTxHash.hash)
         .then((tx) => {
           if (!tx) {
             throw new Error(`Can not find the transaction ${certificateTxHash}`);
@@ -225,7 +225,8 @@ class Hospital {
             throw new Error('Transaction payload is empty.');
           }
 
-          return certificateHashPayload === tx.payload;
+          // TODO : use protobuf-JSON converting instead of substring()
+          return certificateHashPayload.hash.toString('hex') === tx.payload.substring(4, tx.payload.length);
         });
     } catch (err) {
       throw new Error(`Can not find the transaction ${certificateTxHash} ${err}`);
