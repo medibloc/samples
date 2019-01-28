@@ -1,0 +1,61 @@
+{
+  "name": "hospital-js-ko",
+  "version": "0.1.0",
+  "description": "MediBloc javaScript libraries(medjs, phr-js) sample usage",
+  "main": "lib/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "babel": "babel src -d lib --copy-files",
+    "browserify": "browserify ./lib/index.js -o ./dist/phr-js.js -s phr-js",
+    "build": "npm run clean && npm run babel && npm run browserify && npm run uglify",
+    "clean": "npm run clean-dist && npm run clean-lib",
+    "clean-dist": "rm -rf dist",
+    "clean-lib": "rm -rf lib",
+    "lint": "eslint .",
+    "uglify": "uglifyjs -nm -o ./dist/phr-js.min.js ./dist/phr-js.js"
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/medibloc/samples.git"
+  },
+  "keywords": [
+    "medibloc",
+    "javascript",
+    "library"
+  ],
+  "author": "MediBloc <dev@medibloc.org>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/medibloc/samples/issues"
+  },
+  "homepage": "https://github.com/medibloc/samples#readme",
+  "dependencies": {
+    "medjs": "1.0.1",
+    "protobufjs": "~6.8.6"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-import-resolver-babel-module": "^4.0.0",
+    "eslint-plugin-import": "^2.11.0",
+    "medjs": "1.0.1",
+    "mocha": "^5.1.0",
+    "pre-commit": "^1.2.2",
+    "sinon": "^4.5.0",
+    "sinon-chai": "^3.0.0",
+    "uglify-es": "^3.3.9"
+  }
+}
