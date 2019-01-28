@@ -14,7 +14,8 @@
     "clean-dist": "rm -rf dist",
     "clean-lib": "rm -rf lib",
     "lint": "eslint .",
-    "uglify": "uglifyjs -nm -o ./dist/phr-js.min.js ./dist/phr-js.js"
+    "uglify": "uglifyjs -nm -o ./dist/phr-js.min.js ./dist/phr-js.js",
+    "start": "node lib/index.js"
   },
   "pre-commit": [
     "lint"
