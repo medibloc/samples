@@ -1,5 +1,6 @@
-import Medjs from 'medjs';
 import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain'
+import Medjs from 'medjs';
+import { certificateDataV1Utils, hospitalDataV1Utils } from 'phr-js';
 
 const medjs = Medjs.init([BLOCKCHAIN_URL]);
 
@@ -260,3 +261,5 @@ class Hospital {
     return null;
   }
 }
+
+export { Hospital as default}

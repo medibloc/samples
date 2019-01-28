@@ -8,14 +8,14 @@
   },
   "scripts": {
     "babel": "babel src -d lib --copy-files",
-    "browserify": "browserify ./lib/index.js -o ./dist/phr-js.js -s phr-js",
+    "browserify": "browserify ./lib/index.js -o ./dist/hospital-js-ko.js -s hospital-js-ko",
     "build": "npm run clean && npm run babel && npm run browserify && npm run uglify",
     "clean": "npm run clean-dist && npm run clean-lib",
     "clean-dist": "rm -rf dist",
     "clean-lib": "rm -rf lib",
     "lint": "eslint .",
-    "uglify": "uglifyjs -nm -o ./dist/phr-js.min.js ./dist/phr-js.js",
-    "start": "node lib/index.js"
+    "uglify": "uglifyjs -nm -o ./dist/hospital-js-ko.min.js ./dist/hospital-js-ko.js",
+    "start": "babel-node src/index.js"
   },
   "pre-commit": [
     "lint"
@@ -37,7 +37,7 @@
   "homepage": "https://github.com/medibloc/samples#readme",
   "dependencies": {
     "medjs": "1.0.1",
-    "protobufjs": "~6.8.6"
+    "phr-js": "0.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -52,7 +52,6 @@
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-import-resolver-babel-module": "^4.0.0",
     "eslint-plugin-import": "^2.11.0",
-    "medjs": "1.0.1",
     "mocha": "^5.1.0",
     "pre-commit": "^1.2.2",
     "sinon": "^4.5.0",
