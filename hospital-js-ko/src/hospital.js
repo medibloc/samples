@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain'
+import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain';
 import Medjs from 'medjs';
-import { certificateDataV1Utils, hospitalDataV1Utils } from 'phr-js';
+import { certificateDataV1Utils, claimDataV1Utils } from 'phr-js';
 
 const medjs = Medjs.init([BLOCKCHAIN_URL]);
 
@@ -92,11 +92,11 @@ class Hospital {
   /**
    * 주어진 블록체인 address 를 갖는 환자의 진료 청구서를 생성하여 반환 합니다.
    */
-  getBill(patientBlockchainAddress) {
+  getClaim(patientBlockchainAddress) {
     const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
 
     if (patient != null) {
-      const sampleBill = {
+      const sampleClaim = {
         patientNo: patient.patientNo,
         patientName: patient.patientName,
         receipts: [{
@@ -168,7 +168,7 @@ class Hospital {
         }],
       };
 
-      return hospitalDataV1Utils.fillBill(sampleBill);
+      return claimDataV1Utils.fillClaim(sampleClaim);
     }
 
     throw new Error(`${patientBlockchainAddress} 주소를 가진 환자 정보를 찾을 수 없습니다.`);
@@ -177,15 +177,15 @@ class Hospital {
   /**
    * 청구서를 병원의 개인키로 sign 하고, 블록체인에 기록 할 수 있는 transaction 형태로 반환 합니다.
    */
-  getSignedTransaction(bill) {
+  getSignedTransaction(claim) {
     // Blockchain 에서 병원 account 의 현재 정보를 조회 합니다.
     medjs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL)
       .then((accountStatus) => {
         const nonce = parseInt(accountStatus.nonce, 10);
 
-        // Blockchain 에 업로드 할 bill hash 값을 구하고, 블록체인 payload 에 기록 할 형태로 변환 합니다.
-        const billHash = hospitalDataV1Utils.hashBill(bill);
-        const txPayload = medjs.local.transaction.createDataPayload(billHash);
+        // Blockchain 에 업로드 할 claim hash 값을 구하고, 블록체인 payload 에 기록 할 형태로 변환 합니다.
+        const claimHash = claimDataV1Utils.hashClaim(claim);
+        const txPayload = medjs.local.transaction.createDataPayload(claimHash);
 
         // Blockchain 에 기록 할 transaction 을 생성하고, hash 값을 추가합니다.
         const tx = medjs.local.transaction.dataUploadTx({

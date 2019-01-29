@@ -37,7 +37,7 @@
   "homepage": "https://github.com/medibloc/samples#readme",
   "dependencies": {
     "medjs": "1.0.1",
-    "phr-js": "0.0.3"
+    "phr-js": "0.0.4"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

@@ -1,6 +1,6 @@
-import Hospital from 'hospital'
-import MediBloc from 'medibloc'
-import User from 'user'
+import Hospital from 'hospital';
+import MediBloc from 'medibloc';
+import User from 'user';
 
 const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -36,12 +36,12 @@ const run = async () => {
   console.log('병원 - 환자 id 와 사용자의 블록체인 account 를 연계 하였습니다.');
 
   // 병원이 청구서, signed tx 생성하여 사용자(환자)에게 전달
-  const bill = hospital.getBill(user.getAddress());
-  const billTransactionRequest = hospital.getSignedTransaction(bill);
+  const claim = hospital.getClaim(user.getAddress());
+  const claimTransactionRequest = hospital.getSignedTransaction(claim);
   console.log('병원 - 환자의 진료 청구서에 sign 하였습니다.');
 
-  user.bill = bill;
-  user.billTxRequest = billTransactionRequest;
+  user.claim = claim;
+  user.claimTxRequest = claimTransactionRequest;
 };
 
 run();

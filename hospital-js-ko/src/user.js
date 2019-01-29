@@ -1,5 +1,5 @@
 import Medjs from 'medjs';
-import { BLOCKCHAIN_URL } from 'blockchain'
+import { BLOCKCHAIN_URL } from 'blockchain';
 
 const medjs = Medjs.init([BLOCKCHAIN_URL]);
 

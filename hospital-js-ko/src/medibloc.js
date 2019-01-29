@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain'
+import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain';
 import Medjs from 'medjs';
 import { certificateDataV1Utils } from 'phr-js';
 
