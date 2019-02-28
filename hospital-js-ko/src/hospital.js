@@ -85,7 +85,7 @@ class Hospital {
     if (patient != null) {
       patient.blockchainAddress = user.getAddress();
     } else {
-      throw new Error(`주민등록번호가 ${patient.residentRegistrationNumber} 인 환자 정보를 찾을 수 없습니다.`);
+      throw new Error(`주민등록번호가 ${user.residentRegistrationNumber} 인 환자 정보를 찾을 수 없습니다.`);
     }
   }
 
@@ -177,31 +177,30 @@ class Hospital {
   /**
    * 청구서를 병원의 개인키로 sign 하고, 블록체인에 기록 할 수 있는 transaction 형태로 반환 합니다.
    */
-  getSignedTransaction(claim) {
+  async getSignedTransaction(claim) {
     // Blockchain 에서 병원 account 의 현재 정보를 조회 합니다.
-    medjs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL)
-      .then((accountStatus) => {
-        const nonce = parseInt(accountStatus.nonce, 10);
+    const accountStatus
+      = await medjs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL);
+    const nonce = parseInt(accountStatus.nonce, 10);
 
-        // Blockchain 에 업로드 할 claim hash 값을 구하고, 블록체인 payload 에 기록 할 형태로 변환 합니다.
-        const claimHash = claimDataV1Utils.hashClaim(claim);
-        const txPayload = medjs.local.transaction.createDataPayload(claimHash);
+    // Blockchain 에 업로드 할 claim hash 값을 구하고, 블록체인 payload 에 기록 할 형태로 변환 합니다.
+    const claimHash = claimDataV1Utils.hashClaim(claim);
+    const txPayload = medjs.local.transaction.createDataPayload(claimHash);
 
-        // Blockchain 에 기록 할 transaction 을 생성하고, hash 값을 추가합니다.
-        const tx = medjs.local.transaction.dataUploadTx({
-          from: this.account.pubKey,
-          payload: txPayload,
-          nonce: nonce + 1,
-          chain_id: CHAIN_ID,
-        });
+    // Blockchain 에 기록 할 transaction 을 생성하고, hash 값을 추가합니다.
+    const tx = medjs.local.transaction.dataUploadTx({
+      from: this.account.pubKey,
+      payload: txPayload,
+      nonce: nonce + 1,
+      chain_id: CHAIN_ID,
+    });
 
-        // transaction 을 sign 합니다. 비밀번호는 병원 account 의 개인키를 복호화 하는 데 사용 됩니다.
-        this.account.signTx(tx, this.PASSWORD);
+    // transaction 을 sign 합니다. 비밀번호는 병원 account 의 개인키를 복호화 하는 데 사용 됩니다.
+    this.account.signTx(tx, this.PASSWORD);
 
-        // 생성한 transaction 을 반환 합니다.
-        // 사용자는 이 transaction 을 블록체인에 등록 하여 이후 진본증명 시 이용 합니다.
-        return tx;
-      });
+    // 생성한 transaction 을 반환 합니다.
+    // 사용자는 이 transaction 을 블록체인에 등록 하여 이후 진본증명 시 이용 합니다.
+    return tx;
   }
 
   /**
@@ -263,4 +262,4 @@ class Hospital {
   }
 }
 
-export { Hospital as default}
+export { Hospital as default };
