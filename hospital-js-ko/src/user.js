@@ -60,6 +60,18 @@ class User {
       personMobileNumber: '01012345678',
     };
   }
+
+  /**
+   * 병원에 로그인 합니다.
+   */
+  signIn(hospital) {
+    // 병원에서 nonce 를 전달받아 개인키로 서명합니다.
+    const nonce = hospital.getSignInNonce(this.account.pubKey);
+    const signature = medjs.cryptography.sign(this.PRIVATE_KEY, nonce);
+
+    // 서명값을 병원에 전달하여 로그인을 완료하고 token 을 전달 받습니다.
+    this.token = hospital.getSignInToken(this.account.pubKey, signature);
+  }
 }
 
 export { User as default}

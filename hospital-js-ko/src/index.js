@@ -35,6 +35,10 @@ const run = async () => {
   await hospital.mapAccountOntoPatientId(user);
   console.log('병원 - 환자 id 와 사용자의 블록체인 account 를 연계 하였습니다.');
 
+  // 병원에 로그인
+  user.signIn(hospital);
+  console.log(`병원 - 환자 로그인을 완료 하였습니다. token: ${user.token}`);
+
   // 병원이 청구서, signed tx 생성하여 사용자(환자)에게 전달
   const claim = hospital.getClaim(user.getAddress());
   const claimTransactionRequest = hospital.getSignedTransaction(claim);

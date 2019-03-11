@@ -90,6 +90,34 @@ class Hospital {
   }
 
   /**
+   * 로그인 시 환자가 사용할 nonce 값을 생성하여 반환 합니다.
+   * 이후 환자가 nonce 값에 서명한 결과를 검증 하기 위해, 환자에게 전달한 nonce 값을 저장 합니다.
+   */
+  getSignInNonce(patientBlockchainAddress) {
+    const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
+
+    const nonce = medjs.utils.randomHex(32);
+    patient.nonce = nonce;
+
+    return nonce;
+  }
+
+  /**
+   * 환자가 nonce 값에 서명한 결과를 검증 하고, 검증에 성공했다면 token 을 반환 합니다.
+   * 환자는 이후 병원과 통신 시 반환된 token 을 사용 합니다.
+   */
+  getSignInToken(patientBlockchainAddress, signature) {
+    const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
+
+    const isValidSig = medjs.cryptography.verifySignature(patientBlockchainAddress, patient.nonce, signature);
+    if (isValidSig) {
+      return medjs.utils.randomHex(32);
+    } else {
+      throw new Error(`${patientBlockchainAddress} 의 nonce 값에 대한 signature 가 올바르지 않습니다.`);
+    }
+  }
+
+  /**
    * 주어진 블록체인 address 를 갖는 환자의 진료 청구서를 생성하여 반환 합니다.
    */
   getClaim(patientBlockchainAddress) {
