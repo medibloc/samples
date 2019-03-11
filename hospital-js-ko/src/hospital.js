@@ -1,6 +1,7 @@
 import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain';
 import Medjs from 'medjs';
 import { certificateDataV1Utils, claimDataV1Utils } from 'phr-js';
+import jwt from 'jsonwebtoken'
 
 const medjs = Medjs.init([BLOCKCHAIN_URL]);
 
@@ -103,15 +104,15 @@ class Hospital {
   }
 
   /**
-   * 환자가 nonce 값에 서명한 결과를 검증 하고, 검증에 성공했다면 token 을 반환 합니다.
-   * 환자는 이후 병원과 통신 시 반환된 token 을 사용 합니다.
+   * 환자가 nonce 값에 서명한 결과를 검증 하고, 검증에 성공했다면 JWT(Json Web Token) 를 반환 합니다.
+   * 환자는 이 함수를 호출하여 받은 JWT 를 이후 병원과 통신 시 사용 합니다.
    */
   getSignInToken(patientBlockchainAddress, signature) {
     const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
 
     const isValidSig = medjs.cryptography.verifySignature(patientBlockchainAddress, patient.nonce, signature);
     if (isValidSig) {
-      return medjs.utils.randomHex(32);
+      return jwt.sign({bcAddress: patientBlockchainAddress}, this.PRIVATE_KEY);
     } else {
       throw new Error(`${patientBlockchainAddress} 의 nonce 값에 대한 signature 가 올바르지 않습니다.`);
     }
@@ -120,9 +121,15 @@ class Hospital {
   /**
    * 주어진 블록체인 address 를 갖는 환자의 진료 청구서를 생성하여 반환 합니다.
    */
-  getClaim(patientBlockchainAddress) {
-    const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
+  getClaim(token) {
+    let tokenData;
+    try {
+      tokenData = jwt.verify(token, this.PRIVATE_KEY);
+    } catch(err) {
+      throw new Error('유효한 토큰이 아닙니다.');
+    }
 
+    const patient = this.findPatientWithBlockchainAddress(tokenData.bcAddress);
     if (patient != null) {
       const sampleClaim = {
         patientNo: patient.patientNo,
@@ -199,7 +206,7 @@ class Hospital {
       return claimDataV1Utils.fillClaim(sampleClaim);
     }
 
-    throw new Error(`${patientBlockchainAddress} 주소를 가진 환자 정보를 찾을 수 없습니다.`);
+    throw new Error(`${tokenData.bcAddress} 주소를 가진 환자 정보를 찾을 수 없습니다.`);
   }
 
   /**

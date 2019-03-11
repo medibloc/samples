@@ -72,6 +72,10 @@ class User {
     // 서명값을 병원에 전달하여 로그인을 완료하고 token 을 전달 받습니다.
     this.token = hospital.getSignInToken(this.account.pubKey, signature);
   }
+
+  getToken() {
+    return this.token;
+  }
 }
 
 export { User as default}

@@ -37,10 +37,10 @@ const run = async () => {
 
   // 병원에 로그인
   user.signIn(hospital);
-  console.log(`병원 - 환자 로그인을 완료 하였습니다. token: ${user.token}`);
+  console.log(`병원 - 환자 로그인을 완료 하였습니다. token: ${user.getToken()}`);
 
   // 병원이 청구서, signed tx 생성하여 사용자(환자)에게 전달
-  const claim = hospital.getClaim(user.getAddress());
+  const claim = hospital.getClaim(user.getToken());
   const claimTransactionRequest = hospital.getSignedTransaction(claim);
   console.log('병원 - 환자의 진료 청구서에 sign 하였습니다.');
 
