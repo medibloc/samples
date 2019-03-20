@@ -246,28 +246,26 @@ class Hospital {
    * certificateTxHash 로 블록체인에서 transaction 을 조회 하고,
    * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
    */
-  static isUploadedOnBlockchain(certificate, certificateTxHash) {
+  static async isUploadedOnBlockchain(certificate, certificateTxHash) {
     // 주어진 인증서의 hash 깂
     const certificateHash = certificateDataV1Utils.hashCertificate(certificate);
     const certificateHashPayload = panaceajs.local.transaction.createDataPayload(certificateHash);
 
     try {
       // 블록체인에 기록 된 인증서 hash 값
-      return panaceajs.client.getTransaction(certificateTxHash.hash)
-        .then((tx) => {
-          if (!tx) {
-            throw new Error(`Can not find the transaction ${certificateTxHash}`);
-          }
+      const tx = await panaceajs.client.getTransaction(certificateTxHash.hash);
+      if (!tx) {
+        throw new Error(`Can not find the transaction ${certificateTxHash}`);
+      }
 
-          if (!tx.payload) {
-            throw new Error('Transaction payload is empty.');
-          }
+      if (!tx.payload) {
+        throw new Error('Transaction payload is empty.');
+      }
 
-          // TODO : use protobuf-JSON converting instead of substring()
-          return certificateHashPayload.hash.toString('hex') === tx.payload.substring(4, tx.payload.length);
-        });
+      // TODO : use protobuf-JSON converting instead of substring()
+      return certificateHashPayload.hash.toString('hex') === tx.payload.substring(4, tx.payload.length);
     } catch (err) {
-      throw new Error(`Can not find the transaction ${certificateTxHash} ${err}`);
+      throw new Error(`Can not find the transaction '${certificateTxHash}' - ${err}`);
     }
   }
 
