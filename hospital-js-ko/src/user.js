@@ -1,7 +1,7 @@
-import Medjs from 'medjs';
+import Panaceajs from '@medibloc/panacea-js';
 import { BLOCKCHAIN_URL } from 'blockchain';
 
-const medjs = Medjs.init([BLOCKCHAIN_URL]);
+const panaceajs = Panaceajs.init([BLOCKCHAIN_URL]);
 
 class User {
   constructor() {
@@ -35,7 +35,7 @@ class User {
     this.userName = '홍길동';
     this.residentRegistrationNumber = '750101-1234567';
 
-    this.account = new medjs.local.Account(
+    this.account = new panaceajs.local.Account(
       this.PASSWORD,
       this.ENCRYPTED_PRIVATE_KEY,
       this.ENCRYPTED_PRIVATE_KEY.address,
@@ -55,7 +55,7 @@ class User {
       personBirthday: '19750101',
       personGender: '1',
       personNation: '0',
-      personCi: '136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2',
+      personCi: '468w78a7v6ae9a',
       personMobileCompany: 'ABC',
       personMobileNumber: '01012345678',
     };
@@ -67,7 +67,7 @@ class User {
   signIn(hospital) {
     // 병원에서 nonce 를 전달받아 개인키로 서명합니다.
     const nonce = hospital.getSignInNonce(this.account.pubKey);
-    const signature = medjs.cryptography.sign(this.PRIVATE_KEY, nonce);
+    const signature = panaceajs.cryptography.sign(this.PRIVATE_KEY, nonce);
 
     // 서명값을 병원에 전달하여 로그인을 완료하고 token 을 전달 받습니다.
     this.token = hospital.getSignInToken(this.account.pubKey, signature);
@@ -78,4 +78,4 @@ class User {
   }
 }
 
-export { User as default}
+export { User as default };

@@ -1,8 +1,8 @@
 import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain';
-import Medjs from 'medjs';
-import { certificateDataV1Utils } from 'phr-js';
+import Panaceajs from '@medibloc/panacea-js';
+import { certificateDataV1Utils } from '@medibloc/phr-js';
 
-const medjs = Medjs.init([BLOCKCHAIN_URL]);
+const panaceajs = Panaceajs.init([BLOCKCHAIN_URL]);
 
 class MediBloc {
   constructor() {
@@ -33,7 +33,7 @@ class MediBloc {
     this.PUBLIC_KEY = 'e34caca7b7653eb6cbb64cdd9e7c691545cbbe002a5ef9ed86e71577d9c7c2960da413ededc3216df47f27ba6d46babe0ba54ca35d682182d26a6c6aa63f7930';
     this.PASSWORD = 'MediBlocPassWord123!';
 
-    this.account = new medjs.local.Account(
+    this.account = new panaceajs.local.Account(
       this.PASSWORD,
       this.ENCRYPTED_PRIVATE_KEY,
       this.ENCRYPTED_PRIVATE_KEY.address,
@@ -49,14 +49,14 @@ class MediBloc {
 
   sendCertificate(certificate) {
     // Blockchain 에서 병원 account 의 현재 정보를 조회 합니다.
-    return medjs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL)
+    return panaceajs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL)
       .then((accountStatus) => {
         const nonce = parseInt(accountStatus.nonce, 10);
 
         const certificateHash = certificateDataV1Utils.hashCertificate(certificate);
-        const txPayload = medjs.local.transaction.createDataPayload(certificateHash);
+        const txPayload = panaceajs.local.transaction.createDataPayload(certificateHash);
 
-        const tx = medjs.local.transaction.dataUploadTx({
+        const tx = panaceajs.local.transaction.dataUploadTx({
           from: this.account.pubKey,
           payload: txPayload,
           nonce: nonce + 1,
@@ -66,11 +66,9 @@ class MediBloc {
         // transaction 을 sign 합니다. 비밀번호는 병원 account 의 개인키를 복호화 하는 데 사용 됩니다.
         this.account.signTx(tx, this.PASSWORD);
 
-        return medjs.client.sendTransaction(tx).then((txHash) => {
-          return txHash;
-        });
+        return panaceajs.client.sendTransaction(tx).then(txHash => txHash);
       });
   }
 }
 
-export { MediBloc as default}
+export { MediBloc as default };

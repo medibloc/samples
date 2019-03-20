@@ -36,8 +36,8 @@
   },
   "homepage": "https://github.com/medibloc/samples#readme",
   "dependencies": {
-    "medjs": "1.0.1",
-    "phr-js": "0.0.4",
+    "@medibloc/panacea-js": "^1.0.2",
+    "@medibloc/phr-js": "^0.1.0",
     "jsonwebtoken": "^8.5.0"
   },
   "devDependencies": {

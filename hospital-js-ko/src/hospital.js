@@ -1,9 +1,9 @@
 import { BLOCKCHAIN_URL, ACCOUNT_REQUEST_TYPE_TAIL, CHAIN_ID } from 'blockchain';
-import Medjs from 'medjs';
-import { certificateDataV1Utils, claimDataV1Utils } from 'phr-js';
-import jwt from 'jsonwebtoken'
+import Panaceajs from '@medibloc/panacea-js';
+import { certificateDataV1Utils, claimDataV1Utils } from '@medibloc/phr-js';
+import jwt from 'jsonwebtoken';
 
-const medjs = Medjs.init([BLOCKCHAIN_URL]);
+const panaceajs = Panaceajs.init([BLOCKCHAIN_URL]);
 
 class Hospital {
   /**
@@ -47,7 +47,7 @@ class Hospital {
 
     /** 블록체인 account 생성 */
     // 새로운 account 를 생성합니다. 여기서는 예제 코드 작동을 위해 주어진 encrypted private key 를 이용 합니다.
-    this.account = new medjs.local.Account(
+    this.account = new panaceajs.local.Account(
       this.PASSWORD,
       this.ENCRYPTED_PRIVATE_KEY,
       this.ENCRYPTED_PRIVATE_KEY.address,
@@ -97,7 +97,7 @@ class Hospital {
   getSignInNonce(patientBlockchainAddress) {
     const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
 
-    const nonce = medjs.utils.randomHex(32);
+    const nonce = panaceajs.utils.randomHex(32);
     patient.nonce = nonce;
 
     return nonce;
@@ -110,12 +110,16 @@ class Hospital {
   getSignInToken(patientBlockchainAddress, signature) {
     const patient = this.findPatientWithBlockchainAddress(patientBlockchainAddress);
 
-    const isValidSig = medjs.cryptography.verifySignature(patientBlockchainAddress, patient.nonce, signature);
+    const isValidSig = panaceajs.cryptography.verifySignature(
+      patientBlockchainAddress,
+      patient.nonce,
+      signature,
+    );
     if (isValidSig) {
-      return jwt.sign({bcAddress: patientBlockchainAddress}, this.PRIVATE_KEY);
-    } else {
-      throw new Error(`${patientBlockchainAddress} 의 nonce 값에 대한 signature 가 올바르지 않습니다.`);
+      return jwt.sign({ bcAddress: patientBlockchainAddress }, this.PRIVATE_KEY);
     }
+
+    throw new Error(`${patientBlockchainAddress} 의 nonce 값에 대한 signature 가 올바르지 않습니다.`);
   }
 
   /**
@@ -125,7 +129,7 @@ class Hospital {
     let tokenData;
     try {
       tokenData = jwt.verify(token, this.PRIVATE_KEY);
-    } catch(err) {
+    } catch (err) {
       throw new Error('유효한 토큰이 아닙니다.');
     }
 
@@ -215,15 +219,15 @@ class Hospital {
   async getSignedTransaction(claim) {
     // Blockchain 에서 병원 account 의 현재 정보를 조회 합니다.
     const accountStatus
-      = await medjs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL);
+      = await panaceajs.client.getAccount(this.account.pubKey, null, ACCOUNT_REQUEST_TYPE_TAIL);
     const nonce = parseInt(accountStatus.nonce, 10);
 
     // Blockchain 에 업로드 할 claim hash 값을 구하고, 블록체인 payload 에 기록 할 형태로 변환 합니다.
     const claimHash = claimDataV1Utils.hashClaim(claim);
-    const txPayload = medjs.local.transaction.createDataPayload(claimHash);
+    const txPayload = panaceajs.local.transaction.createDataPayload(claimHash);
 
     // Blockchain 에 기록 할 transaction 을 생성하고, hash 값을 추가합니다.
-    const tx = medjs.local.transaction.dataUploadTx({
+    const tx = panaceajs.local.transaction.dataUploadTx({
       from: this.account.pubKey,
       payload: txPayload,
       nonce: nonce + 1,
@@ -245,11 +249,11 @@ class Hospital {
   static isUploadedOnBlockchain(certificate, certificateTxHash) {
     // 주어진 인증서의 hash 깂
     const certificateHash = certificateDataV1Utils.hashCertificate(certificate);
-    const certificateHashPayload = medjs.local.transaction.createDataPayload(certificateHash);
+    const certificateHashPayload = panaceajs.local.transaction.createDataPayload(certificateHash);
 
     try {
       // 블록체인에 기록 된 인증서 hash 값
-      return medjs.client.getTransaction(certificateTxHash.hash)
+      return panaceajs.client.getTransaction(certificateTxHash.hash)
         .then((tx) => {
           if (!tx) {
             throw new Error(`Can not find the transaction ${certificateTxHash}`);
@@ -272,7 +276,7 @@ class Hospital {
    */
   static isValidCI(ci, residentRegistrationNumber) {
     // TODO - sample 사용 기관에서 구현
-    console.log(ci, residentRegistrationNumber);
+    console.log(`isValidCI(${ci}, ${residentRegistrationNumber})`);
     return true;
   }
 
