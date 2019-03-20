@@ -52,7 +52,7 @@ class User {
     return {
       certificationResult: 'success',
       personName: this.userName,
-      personBirthday: '19750101',
+      personBirthdate: '19750101',
       personGender: '1',
       personNation: '0',
       personCi: '468w78a7v6ae9a',
