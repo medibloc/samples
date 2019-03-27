@@ -75,6 +75,11 @@ class Hospital {
       throw new Error('주어진 인증서가 해당 transaction 에 기록 되어 있지 않습니다.');
     }
 
+    // 인증서 만료일 확인
+    if (Date.parse(user.certificate.expiryDate) < Date.now()) {
+      throw new Error('인증서가 만료되었습니다.');
+    }
+
     // CI 유효성 확인
     const ci = user.certificate.certification.personCi;
     if (!Hospital.isValidCI(ci, user.residentRegistrationNumber)) {
