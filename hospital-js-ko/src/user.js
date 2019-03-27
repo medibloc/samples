@@ -55,7 +55,7 @@ class User {
       personBirthdate: '19750101',
       personGender: '1',
       personNation: '0',
-      personCi: '468w78a7v6ae9a',
+      personCi: 'D2i6IJki20OCwiwk+CCyM0cJL1ZFMambjSzdWTwQ3qh/2MlI4cFv2/DBKt3XJMHLfMpEWRqGh5jTVziz9+H/ZA==',
       personMobileCompany: 'ABC',
       personMobileNumber: '01012345678',
     };
