@@ -115,15 +115,13 @@ public class Hospital {
         if (patient != null) {
             /*** Claim ***/
             Claim.Builder claimBuilder = Claim.newBuilder();
-            claimBuilder.setPatientNo(patient.getPatientNo());
-            claimBuilder.setPatientName(patient.getPatientName());
 
             /*** Claim.Receipt ***/
             Receipt.Builder receiptBuilder = Receipt.newBuilder();
             receiptBuilder.setReceiptNo("20181204-S1284");
             receiptBuilder.setReceiptType("I");
-            receiptBuilder.setPatientNo("12345678");
-            receiptBuilder.setPatientName("홍길동");
+            receiptBuilder.setPatientNo(patient.getPatientNo());
+            receiptBuilder.setPatientName(patient.getPatientName());
             receiptBuilder.setTreatmentStartDate("2018-12-06");
             receiptBuilder.setTreatmentEndDate("2018-12-06");
             receiptBuilder.setTreatmentDepartment("피부과");
@@ -172,30 +170,22 @@ public class Hospital {
                     .setUncoveredUnchosenFee("0")
                     .build());
 
-            /*** Claim.Prescription ***/
-            Prescription.Builder prescriptionBuilder = Prescription.newBuilder();
-            prescriptionBuilder.setGivenNo("301");
-            prescriptionBuilder.setPatientName(patient.getPatientName());
-            prescriptionBuilder.setPatientBirthdate("19750101");
-            prescriptionBuilder.setPatientGender("1");
-            prescriptionBuilder.setDiagnosisCode("DC001");
-            prescriptionBuilder.setDoctorName("김철수");
-            prescriptionBuilder.setDoctorLicenseNo("00000");
+            /*** Claim.Diagnosis ***/
+            Diagnosis.Builder diagnosisBuilder1 = Diagnosis.newBuilder();
+            diagnosisBuilder1.setDiagnosisCodeVersion("ICD-10-2016");
+            diagnosisBuilder1.setDiagnosisCodeType(10); // 주상병
+            diagnosisBuilder1.setDiagnosisCode("J00");
 
-            /*** Claim.Prescription.PrescriptionItems ***/
-            prescriptionBuilder.addPrescriptionItems(PrescriptionItem.newBuilder()
-                    .setDrugCode("AA01")
-                    .setDrugName("DrugName")
-                    .setDailyDose("30mg")
-                    .setDailyFrequency("3")
-                    .setPrescriptionDuration("5")
-                    .setUsage("용법")
-                    .build());
+            Diagnosis.Builder diagnosisBuilder2 = Diagnosis.newBuilder();
+            diagnosisBuilder2.setDiagnosisCodeVersion("KCD-7");
+            diagnosisBuilder2.setDiagnosisCodeType(20); // 부상병
+            diagnosisBuilder2.setDiagnosisCode("J30.3");
 
             /*** Claim - build, fill, and return ***/
             Claim partialClaim = claimBuilder
                     .addReceipts(receiptBuilder)
-                    .addPrescriptions(prescriptionBuilder).build();
+                    .addDiagnoses(diagnosisBuilder1)
+                    .addDiagnoses(diagnosisBuilder2).build();
 
             return ClaimDataV1Utils.fillClaim(partialClaim);
         } else {
