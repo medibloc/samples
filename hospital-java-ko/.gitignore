@@ -1,0 +1,15 @@
+# IntelliJ
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+out/
+
+# junit test result files
+*.testresult*
+
+/sample_accounts

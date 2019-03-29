@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'org.medibloc.hospital-java-ko'
+version '0.0.0'
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    implementation "org.medibloc.panacea:core:0.1.1"
+    implementation "org.medibloc.phr:phr:0.1.3"
+}
