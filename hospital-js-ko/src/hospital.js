@@ -141,17 +141,19 @@ class Hospital {
     const patient = this.findPatientWithBlockchainAddress(tokenData.bcAddress);
     if (patient != null) {
       const sampleClaim = {
-        patientNo: patient.patientNo,
-        patientName: patient.patientName,
+        claimNo: '20181204-S1284',
         receipts: [{
           receiptNo: '20181204-S1284',
           receiptType: 'I',
           patientNo: '12345678',
           patientName: '홍길동',
+          companyRegistrationNo: '11100999',
           treatmentStartDate: '2018-12-06',
           treatmentEndDate: '2018-12-06',
           treatmentDepartment: '피부과',
           treatmentDepartmentCode: 'DER',
+          treatmentType: '',
+          treatmentTypeCode: '',
           coveredFee: '11000',
           uncoveredFee: '20000',
           upperLimitExcess: '0',
@@ -167,7 +169,9 @@ class Hospital {
           cardPayAmount: '21000',
           feeItems: [{
             feeItemName: '초진 진찰료',
+            feeItemCode: '',
             treatmentDate: '2018-12-06',
+            coveredType: '',
             medicalChargeCode: 'AA157',
             price: '11000',
             quantity: '1',
@@ -180,7 +184,9 @@ class Hospital {
             uncoveredUnchosenFee: '0',
           }, {
             feeItemName: '검사료',
+            feeItemCode: '',
             treatmentDate: '2018-12-06',
+            coveredType: '',
             medicalChargeCode: 'BB157',
             price: '20000',
             quantity: '1',
@@ -193,22 +199,14 @@ class Hospital {
             uncoveredUnchosenFee: '0',
           }],
         }],
-        prescriptions: [{
-          givenNo: '301',
-          patientName: patient.patientName,
-          patientBirthdate: '19750101',
-          patientGender: '1',
-          diagnosisCode: 'DC001',
-          doctorName: '김철수',
-          doctorLicenseNo: '00000',
-          prescriptionItems: [{
-            drugCode: 'AA01',
-            drugName: 'DrugName',
-            dailyDose: '30mg',
-            dailyFrequency: '3',
-            prescriptionDuration: '5',
-            usage: '용법',
-          }],
+        diagnoses: [{
+          diagnosisCodeVersion: 'ICD-10-2016',
+          diagnosisCodeType: 10, // 주상병
+          diagnosisCode: 'J00',
+        }, {
+          diagnosisCodeVersion: 'KCD-7',
+          diagnosisCodeType: 20, // 부상병
+          diagnosisCode: 'J30.3',
         }],
       };
 

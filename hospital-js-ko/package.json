@@ -37,7 +37,7 @@
   "homepage": "https://github.com/medibloc/samples#readme",
   "dependencies": {
     "@medibloc/panacea-js": "^1.0.2",
-    "@medibloc/phr-js": "^0.1.4",
+    "@medibloc/phr-js": "^0.1.8",
     "jsonwebtoken": "^8.5.0"
   },
   "devDependencies": {
