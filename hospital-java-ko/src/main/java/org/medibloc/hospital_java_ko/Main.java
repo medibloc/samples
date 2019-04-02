@@ -12,11 +12,11 @@ public class Main {
 
         // 사용자 본인인증 수행
         User user = new User();
-        Certification certification = user.certify();
+        Certification.Builder certificationBuilder = user.certify();
         System.out.println("사용자 - 본인인증을 수행 하였습니다.");
 
         // 본인인증 결과를 블록체인에 기록
-        Certificate certificate = mediBloc.generateCertificate(user.getAddress(), certification);
+        Certificate certificate = mediBloc.generateCertificate(user.getAddress(), certificationBuilder);
         String certificateTxHash = mediBloc.sendCertificate(certificate);
         System.out.println("MediBloc - 사용자의 본인인증 결과를 블록체인에 기록 하였습니다.");
         System.out.println("           transaction 조회: https://stg-testnet-node.medibloc.org/v1/transaction?hash=" + certificateTxHash);

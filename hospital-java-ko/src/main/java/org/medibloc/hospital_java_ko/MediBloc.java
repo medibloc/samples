@@ -33,13 +33,13 @@ public class MediBloc {
         System.out.println("MediBloc - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
     }
 
-    public Certificate generateCertificate(String address, Certification certification) {
-        Certificate certificate = Certificate.newBuilder()
+    public Certificate generateCertificate(String address, Certification.Builder certificationBuilder) {
+        Certificate.Builder certificateBuilder = Certificate.newBuilder()
                 .setBlockchainAddress(address) // user's blockchain address
                 .setExpiryDate("2099-07-01 15:01:20")
-                .setCertification(certification)
-                .build();
-        return CertificateDataV1Utils.fillCertificate(certificate);
+                .setCertification(certificationBuilder);
+
+        return CertificateDataV1Utils.fillCertificate(certificateBuilder);
     }
 
     public String sendCertificate(Certificate certificate) throws Exception {

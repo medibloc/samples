@@ -115,17 +115,21 @@ public class Hospital {
         if (patient != null) {
             /*** Claim ***/
             Claim.Builder claimBuilder = Claim.newBuilder();
+            claimBuilder.setClaimNo("20181204-S1284");
 
-            /*** Claim.Receipt ***/
+            /*** Claim.Receipts ***/
             Receipt.Builder receiptBuilder = Receipt.newBuilder();
             receiptBuilder.setReceiptNo("20181204-S1284");
             receiptBuilder.setReceiptType("I");
             receiptBuilder.setPatientNo(patient.getPatientNo());
             receiptBuilder.setPatientName(patient.getPatientName());
+            receiptBuilder.setCompanyRegistrationNo("11100999");
             receiptBuilder.setTreatmentStartDate("2018-12-06");
             receiptBuilder.setTreatmentEndDate("2018-12-06");
             receiptBuilder.setTreatmentDepartment("피부과");
             receiptBuilder.setTreatmentDepartmentCode("DER");
+            receiptBuilder.setTreatmentType("");
+            receiptBuilder.setTreatmentTypeCode("");
             receiptBuilder.setCoveredFee("11000");
             receiptBuilder.setUncoveredFee("20000");
             receiptBuilder.setUpperLimitExcess("0");
@@ -143,7 +147,9 @@ public class Hospital {
             /*** Claim.Receipt.FeeItems ***/
             receiptBuilder.addFeeItems(FeeItem.newBuilder()
                     .setFeeItemName("초진 진찰료")
+                    .setFeeItemCode("")
                     .setTreatmentDate("2018-12-06")
+                    .setCoveredType("")
                     .setMedicalChargeCode("AA157")
                     .setPrice("11000")
                     .setQuantity("1")
@@ -153,11 +159,12 @@ public class Hospital {
                     .setCoveredInsuranceFee("10000")
                     .setCoveredPatientAllFee("0")
                     .setUncoveredChosenFee("0")
-                    .setUncoveredUnchosenFee("0")
-                    .build());
+                    .setUncoveredUnchosenFee("0"));
             receiptBuilder.addFeeItems(FeeItem.newBuilder()
                     .setFeeItemName("검사료")
+                    .setFeeItemCode("")
                     .setTreatmentDate("2018-12-06")
+                    .setCoveredType("")
                     .setMedicalChargeCode("BB157")
                     .setPrice("20000")
                     .setQuantity("1")
@@ -167,10 +174,9 @@ public class Hospital {
                     .setCoveredInsuranceFee("0")
                     .setCoveredPatientAllFee("0")
                     .setUncoveredChosenFee("20000")
-                    .setUncoveredUnchosenFee("0")
-                    .build());
+                    .setUncoveredUnchosenFee("0"));
 
-            /*** Claim.Diagnosis ***/
+            /*** Claim.Diagnoses ***/
             Diagnosis.Builder diagnosisBuilder1 = Diagnosis.newBuilder();
             diagnosisBuilder1.setDiagnosisCodeVersion("ICD-10-2016");
             diagnosisBuilder1.setDiagnosisCodeType(10); // 주상병
@@ -181,11 +187,10 @@ public class Hospital {
             diagnosisBuilder2.setDiagnosisCodeType(20); // 부상병
             diagnosisBuilder2.setDiagnosisCode("J30.3");
 
-            /*** Claim - build, fill, and return ***/
-            Claim partialClaim = claimBuilder
+            Claim.Builder partialClaim = claimBuilder
                     .addReceipts(receiptBuilder)
                     .addDiagnoses(diagnosisBuilder1)
-                    .addDiagnoses(diagnosisBuilder2).build();
+                    .addDiagnoses(diagnosisBuilder2);
 
             return ClaimDataV1Utils.fillClaim(partialClaim);
         } else {

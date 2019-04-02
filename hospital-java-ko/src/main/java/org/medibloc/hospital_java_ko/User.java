@@ -65,7 +65,7 @@ public class User {
         this.claimTxRequest = claimTxRequest;
     }
 
-    public Certification certify() {
+    public Certification.Builder certify() {
         return Certification.newBuilder()
                 .setCertificationResult("success")
                 .setPersonName("홍길동")
@@ -74,7 +74,6 @@ public class User {
                 .setPersonNation("0")
                 .setPersonCi("136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2")
                 .setPersonMobileCompany("ABC")
-                .setPersonMobileNumber("01012345678")
-                .build();
+                .setPersonMobileNumber("01012345678");
     }
 }
