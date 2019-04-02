@@ -31,7 +31,7 @@ public class Hospital {
     private static final BigInteger PUBLIC_KEY = new BigInteger("718101c8a565a58bf416c8d30b335e6bb9701d1532e76b38298ef7e252c321cd3077389f0517d40faac6d8db45aa81ad86914f995abcbdbdc6e9605a1e46c844", 16);
     private static final String PASSWORD = "hospitalPassWord123!";
 
-    private static final String ACCOUNT_FILE_PATH = "sample/sample_accounts";
+    private static final String ACCOUNT_FILE_PATH = "sample_accounts";
 
     private List<Patient> patientList;
     private Account account;
