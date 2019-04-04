@@ -43,7 +43,7 @@ class MediBloc {
   }
 
   static generateCertificate(blockchainAddress, certification) {
-    const expiryDate = '2019-07-01 15:01:20';
+    const expiryDate = '2099-07-01 15:01:20';
     const certificate = { blockchainAddress, expiryDate, certification };
     return certificateDataV1Utils.fillCertificate(certificate);
   }
