@@ -5,6 +5,7 @@ class Patient {
     private String patientName;
     private String RRN; // 주민등록번호
     private String blockchainAddress;
+    private String nonce;
 
     public Patient(String patientNo, String patientName, String RRN) {
         this.patientNo = patientNo;
@@ -30,5 +31,13 @@ class Patient {
 
     public void setBlockchainAddress(String blockchainAddress) {
         this.blockchainAddress = blockchainAddress;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
     }
 }

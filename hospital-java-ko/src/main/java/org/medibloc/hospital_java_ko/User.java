@@ -4,6 +4,7 @@ import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.core.protobuf.Rpc;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.crypto.Sign;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1.Certification;
 import org.medibloc.phr.ClaimDataV1.Claim;
@@ -17,18 +18,21 @@ public class User {
     private static final BigInteger PUBLIC_KEY = new BigInteger("107c5eae25e0443be09496162362fee885402379ee4c0fca30af8dbaa340e507933890e0c8f931351a9a37d7a151d1e8d9620b55adbe7a5e8663a4cea843f887", 16);
     private static final String PASSWORD = "userPassWord123!";
 
+    private ECKeyPair ecKeyPair;
     private Account account;
     private String residentRegistrationNumber = "750101-1234567";
 
     private Certificate certificate;
     private String certificateTxHash;
 
+    private String token;
+
     private Claim claim;
     private Rpc.SendTransactionRequest claimTxRequest;
 
     public User() throws Exception {
-        ECKeyPair keyPair = new ECKeyPair(PRIVATE_KEY, PUBLIC_KEY);
-        this.account = AccountUtils.createAccount(PASSWORD, keyPair, null);
+        ecKeyPair = new ECKeyPair(PRIVATE_KEY, PUBLIC_KEY);
+        this.account = AccountUtils.createAccount(PASSWORD, ecKeyPair, null);
 
         System.out.println("사용자 - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
     }
@@ -57,6 +61,14 @@ public class User {
         return this.certificateTxHash;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public void setClaim(Claim claim) {
         this.claim = claim;
     }
@@ -75,5 +87,17 @@ public class User {
                 .setPersonCi("136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2")
                 .setPersonMobileCompany("ABC")
                 .setPersonMobileNumber("01012345678");
+    }
+
+    /**
+     * 병원에 로그인 합니다.
+     */
+    public void signIn(Hospital hospital) {
+        // 병원에서 nonce 를 전달받아 개인키로 서명합니다.
+        String nonce = hospital.getSignInNonce(this.account.getAddress());
+        String signature = Sign.signMessage(nonce, ecKeyPair);
+
+        // 서명값을 병원에 전달하여 로그인을 완료하고 token 을 전달 받습니다.
+        this.setToken(hospital.getSignInToken(this.account.getAddress(), signature));
     }
 }

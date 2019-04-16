@@ -1,5 +1,9 @@
 package org.medibloc.hospital_java_ko;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.protobuf.ByteString;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
@@ -8,6 +12,8 @@ import org.medibloc.panacea.core.Panacea;
 import org.medibloc.panacea.core.protobuf.BlockChain;
 import org.medibloc.panacea.core.protobuf.Rpc;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.crypto.SecureRandomUtils;
+import org.medibloc.panacea.crypto.Sign;
 import org.medibloc.panacea.tx.Transaction;
 import org.medibloc.panacea.utils.Numeric;
 import org.medibloc.phr.CertificateDataV1.Certificate;
@@ -22,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Hospital {
+    private static final String JWT_SECRET_KEY = "medibloc_hospital_secret_key";
+    private static final String JWT_ISSUER = "hospital";
+
     private static final String BLOCKCHAIN_URL = "https://stg-testnet-node.medibloc.org";
     private static final String ACCOUNT_REQUEST_TYPE_TAIL = "tail";
 
@@ -107,9 +116,47 @@ public class Hospital {
     }
 
     /**
+     * 로그인 시 환자가 사용할 nonce 값을 생성하여 반환 합니다.
+     * 이후 환자가 nonce 값에 서명한 결과를 검증 하기 위해, 환자에게 전달한 nonce 값을 저장 합니다.
+     */
+    public String getSignInNonce(String patientBlockchainAddress) {
+        Patient patient = findPatientWithBlockchainAddress(patientBlockchainAddress);
+
+        String nonce = Numeric.byteArrayToHex(SecureRandomUtils.generateRandomBytes(32));
+        patient.setNonce(nonce);
+
+        return nonce;
+    }
+
+    /**
+     * 환자가 nonce 값에 서명한 결과를 검증 하고, 검증에 성공했다면 JWT(Json Web Token) 를 반환 합니다.
+     * 환자는 이 함수를 호출하여 받은 JWT 를 이후 병원과 통신 시 사용 합니다.
+     */
+    public String getSignInToken(String patientBlockchainAddress, String signature) {
+        Patient patient = findPatientWithBlockchainAddress(patientBlockchainAddress);
+
+        boolean isValidSig = Sign.verifySignature(patientBlockchainAddress, patient.getNonce(), signature);
+
+        if (isValidSig) {
+            Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY);
+            String jwt = JWT.create().withIssuer(JWT_ISSUER).sign(algorithm);
+            return jwt;
+        } else {
+            throw new IllegalArgumentException(patientBlockchainAddress + "의 nonce 값에 대한 signature 가 올바르지 않습니다.");
+        }
+    }
+
+    /**
      * 주어진 블록체인 address 를 갖는 환자의 진료 청구서를 생성하여 반환 합니다.
      */
-    public Claim getClaim(String patientBlockchainAddress) {
+    public Claim getClaim(String patientBlockchainAddress, String token) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY);
+            DecodedJWT jwt = JWT.require(algorithm).withIssuer(JWT_ISSUER).build().verify(token);
+        } catch (JWTVerificationException ex) {
+            throw new IllegalArgumentException("유효한 토큰이 아닙니다.");
+        }
+
         Patient patient = findPatientWithBlockchainAddress(patientBlockchainAddress);
 
         if (patient != null) {
