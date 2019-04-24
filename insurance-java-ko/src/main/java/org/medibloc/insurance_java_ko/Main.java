@@ -24,5 +24,16 @@ public class Main {
         user.setCertificateTxHash(certificateTxHash);
 
         Thread.sleep(5000);
+
+        // 보험사 객체 생성. 생성자 내부적으로 mockup data 와 블록체인 계정을 생성 합니다.
+        Insurer insurer = new Insurer();
+
+        // TODO 보험사에 사용자의 blockchain 주소 등록
+
+        // TODO 계약 조회
+
+        // TODO 청구 접수
+
+        // TODO 접수내역 업데이트 조회
     }
 }
