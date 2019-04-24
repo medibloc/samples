@@ -7,7 +7,7 @@ import org.medibloc.phr.ClaimDataV1.Claim;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        System.out.println("phr-java sample Main 함수를 실행합니다.");
+        System.out.println("hospital-java sample Main 함수를 실행합니다.");
         MediBloc mediBloc = new MediBloc();
 
         // 사용자 본인인증 수행

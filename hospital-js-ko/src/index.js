@@ -7,7 +7,7 @@ const sleep = (milliseconds) => {
 };
 
 const run = async () => {
-  console.log('phr-js sample 함수를 실행합니다.');
+  console.log('hospital-js sample 함수를 실행합니다.');
   const mediBloc = new MediBloc();
 
   // 사용자 본인인증 수행
