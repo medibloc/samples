@@ -32,7 +32,10 @@ public class Main {
         insurer.signUp(user.getCertificate(), user.getCertificateTxHash());
         System.out.println("보험사 - 사용자 id 와 사용자의 블록체인 account 를 연계 하였습니다.");
 
-        // TODO 계약 조회
+        // 계약 조회
+        String encryptedAccidentDate = user.getEncryptedAccidentDate(insurer.getAddress());
+        user.setInsuranceEntityList(insurer.getInsuranceList(user.getAddress(), encryptedAccidentDate));
+        System.out.println("보험사 - 보험 계약상품 정보를 사용자에게 반환 하였습니다.");
 
         // TODO 청구 접수
 

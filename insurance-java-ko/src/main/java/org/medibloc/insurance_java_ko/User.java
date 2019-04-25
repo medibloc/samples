@@ -2,11 +2,14 @@ package org.medibloc.insurance_java_ko;
 
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
+import org.medibloc.panacea.crypto.AES256CTR;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.crypto.Keys;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1.Certification;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class User {
     private static final String MNEMONIC = "rate knife faculty sting still festival village between base disease violin device";
@@ -21,11 +24,10 @@ public class User {
     private Certificate certificate;
     private String certificateTxHash;
 
-    public User() throws Exception {
-        ecKeyPair = new ECKeyPair(PRIVATE_KEY, PUBLIC_KEY);
-        this.account = AccountUtils.createAccount(PASSWORD, ecKeyPair, null);
+    private List<InsuranceEntity> insuranceEntityList;
 
-        System.out.println("사용자 - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
+    private String getPrivateKey() {
+        return PRIVATE_KEY.toString(16);
     }
 
     public String getAddress() {
@@ -48,6 +50,21 @@ public class User {
         return this.certificateTxHash;
     }
 
+    public List<InsuranceEntity> getInsuranceEntityList() {
+        return insuranceEntityList;
+    }
+
+    public void setInsuranceEntityList(List<InsuranceEntity> insuranceEntityList) {
+        this.insuranceEntityList = insuranceEntityList;
+    }
+
+    public User() throws Exception {
+        ecKeyPair = new ECKeyPair(PRIVATE_KEY, PUBLIC_KEY);
+        this.account = AccountUtils.createAccount(PASSWORD, ecKeyPair, null);
+
+        System.out.println("사용자 - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
+    }
+
     public Certification.Builder certify() {
         return Certification.newBuilder()
                 .setCertificationResult("success")
@@ -58,5 +75,13 @@ public class User {
                 .setPersonCi("136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2")
                 .setPersonMobileCompany("ABC")
                 .setPersonMobileNumber("01012345678");
+    }
+
+    public String getEncryptedAccidentDate(String insurerBlockchainAddress) throws Exception {
+        // claim data 에 해당하는 사고일.
+        String accidentDate = "20190101";
+
+        String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), insurerBlockchainAddress);
+        return AES256CTR.encryptData(sharedSecretKey, accidentDate);
     }
 }

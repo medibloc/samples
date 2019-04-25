@@ -7,7 +7,9 @@ import org.medibloc.panacea.core.HttpService;
 import org.medibloc.panacea.core.Panacea;
 import org.medibloc.panacea.core.protobuf.BlockChain;
 import org.medibloc.panacea.core.protobuf.Rpc;
+import org.medibloc.panacea.crypto.AES256CTR;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.crypto.Keys;
 import org.medibloc.panacea.utils.Numeric;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1Utils;
@@ -35,6 +37,10 @@ public class Insurer {
 
     private Account account;
 
+    private String getPrivateKey() {
+        return PRIVATE_KEY.toString(16);
+    }
+
     public Account getAccount() {
         return account;
     }
@@ -43,11 +49,19 @@ public class Insurer {
         this.account = account;
     }
 
+    public String getAddress() {
+        return this.account.getAddress();
+    }
+
     public Insurer() throws Exception {
         userList = new ArrayList<UserEntity>();
         userList.add(new UserEntity("00000000", "ㅇㅇㅇ", "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
         userList.add(new UserEntity("11111111", "ㅁㅁㅁ", "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
-        userList.add(new UserEntity("12345678", "홍길동", "136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2"));
+
+        List<InsuranceEntity> sampleInsuranceEntityList = new ArrayList<InsuranceEntity>();
+        sampleInsuranceEntityList.add(new InsuranceEntity("0001", "실손의료비보험", "홍길동", null));
+        sampleInsuranceEntityList.add(new InsuranceEntity("0002", "애니카자동차보험", "홍길동", "김철수"));
+        userList.add(new UserEntity("12345678", "홍길동", "136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2", sampleInsuranceEntityList));
 
         /** 블록체인 account 생성, 저장, 불러오기 **/
 
@@ -85,6 +99,21 @@ public class Insurer {
             user.setBlockchainAddress(certificate.getBlockchainAddress());
         } else {
             throw new RuntimeException("CI 가" + certificate.getCertification().getPersonCi() + " 인 사용자 정보를 찾을 수 없습니다.");
+        }
+    }
+
+    public List<InsuranceEntity> getInsuranceList(String userBlockchainAddress, String encryptedAccidentDate) throws Exception {
+        String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), userBlockchainAddress);
+        String accidentDate = AES256CTR.decryptData(sharedSecretKey, encryptedAccidentDate);
+        System.out.println("보험사 - 사고일 당시의 계약 건을 조회합니다. 복호화 한 사고일: " + accidentDate);
+
+        // 블록체인 주소로 사용자를 조회하여, 해당 사용자의 사고일 당시 계약 건을 반환 합니다.
+        UserEntity user = findUserWithBlockchainAddress(userBlockchainAddress);
+        if (user != null) {
+            // 본 샘플 소스코드에서는 등록된 계약이 사고일 당시에 해당되는 것으로 가정합니다.
+            return user.getInsuranceEntityList();
+        } else {
+            throw new RuntimeException(userBlockchainAddress + " 주소를 가진 사용자 정보를 찾을 수 없습니다.");
         }
     }
 
