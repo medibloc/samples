@@ -1,6 +1,8 @@
 package org.medibloc.insurance_java_ko;
 
 import com.google.protobuf.ByteString;
+import org.medibloc.insurance_java_ko.entities.ClaimRequest;
+import org.medibloc.insurance_java_ko.entities.ClaimResponse;
 import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
 import org.medibloc.insurance_java_ko.entities.UserEntity;
 import org.medibloc.panacea.account.Account;
@@ -15,6 +17,8 @@ import org.medibloc.panacea.crypto.Keys;
 import org.medibloc.panacea.utils.Numeric;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1Utils;
+import org.medibloc.phr.ClaimDataV1.Claim;
+import org.medibloc.phr.ClaimDataV1Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,6 +123,18 @@ public class Insurer {
         }
     }
 
+    public ClaimResponse sendClaim(String userBlockchainAddress, String encryptedClaimRequest) throws Exception {
+        String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), userBlockchainAddress);
+        // TODO ClaimRequest claimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
+        ClaimRequest claimRequest = new ClaimRequest();
+
+        isUploadedOnBlockchain(claimRequest.getClaim(), claimRequest.getClaimTxHash());
+
+        ClaimResponse response = new ClaimResponse();
+        response.setSuccess(true);
+        return response;
+    }
+
     /**
      * certificateTxHash 로 블록체인에서 transaction 을 조회 하고,
      * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
@@ -130,20 +146,38 @@ public class Insurer {
                 .build();
         String certificateHash = Numeric.toHexStringNoPrefix(certificateHashPayload.toByteArray());
 
+        return isUploadedOnBlockchain(certificateHash, certificateTxHash);
+    }
+
+    /**
+     * claimTxHash 로 블록체인에서 transaction 을 조회 하고,
+     * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
+     */
+    private boolean isUploadedOnBlockchain(Claim claim, String claimTxHash) {
+        // 주어진 인증서의 hash 깂
+        BlockChain.AddRecordPayload claimHashPayload = BlockChain.AddRecordPayload.newBuilder()
+                .setHash(ByteString.copyFrom(ClaimDataV1Utils.hash(claim)))
+                .build();
+        String claimHash = Numeric.toHexStringNoPrefix(claimHashPayload.toByteArray());
+
+        return isUploadedOnBlockchain(claimHash, claimTxHash);
+    }
+
+    private boolean isUploadedOnBlockchain(String dataHash, String txHash) {
         try {
             Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
-            Rpc.Transaction transaction = panacea.getTransaction(certificateTxHash).send();
+            Rpc.Transaction transaction = panacea.getTransaction(txHash).send();
 
             // 블록체인에 기록 된 인증서 hash 값
-            String certificateHashOnBlockchain = transaction.getPayload();
+            String dataHashOnBlockchain = transaction.getPayload();
 
-            if (certificateHashOnBlockchain == null || certificateHashOnBlockchain.isEmpty()) {
+            if (dataHashOnBlockchain == null || dataHashOnBlockchain.isEmpty()) {
                 throw new RuntimeException("Transaction payload is empty.");
             }
 
-            return certificateHash.equals(certificateHashOnBlockchain);
+            return dataHash.equals(dataHashOnBlockchain);
         } catch (IOException ex) {
-            throw new RuntimeException("Can not find the transaction " + certificateTxHash, ex);
+            throw new RuntimeException("Can not find the transaction " + txHash, ex);
         }
     }
 

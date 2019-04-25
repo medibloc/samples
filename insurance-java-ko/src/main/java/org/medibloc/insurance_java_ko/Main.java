@@ -1,5 +1,6 @@
 package org.medibloc.insurance_java_ko;
 
+import org.medibloc.insurance_java_ko.entities.ClaimResponse;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1.Certification;
 
@@ -36,8 +37,12 @@ public class Main {
         String encryptedAccidentDate = user.getEncryptedAccidentDate(insurer.getAddress());
         user.setInsuranceEntityList(insurer.getInsuranceList(user.getAddress(), encryptedAccidentDate));
         System.out.println("보험사 - 보험 계약상품 정보를 사용자에게 반환 하였습니다.");
+        System.out.println("<보험 계약상품 정보>\n" + user.getInsuranceEntityList());
 
-        // TODO 청구 접수
+        // 청구 접수
+        ClaimResponse claimResponse = insurer.sendClaim(user.getAddress(), user.getEncryptedClaimRequest(insurer.getAddress()));
+        System.out.println("보험사 - 보험 청구를 접수 하였습니다.");
+        System.out.println("<보험 청구 접수 정보>\n" + claimResponse);
 
         // TODO 접수내역 업데이트 조회
     }
