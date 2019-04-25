@@ -1,4 +1,4 @@
-package org.medibloc.insurance_java_ko;
+package org.medibloc.insurance_java_ko.entities;
 
 public class InsuranceEntity {
     /** 보험상품 코드 */

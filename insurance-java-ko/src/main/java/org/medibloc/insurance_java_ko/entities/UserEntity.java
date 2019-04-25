@@ -1,4 +1,4 @@
-package org.medibloc.insurance_java_ko;
+package org.medibloc.insurance_java_ko.entities;
 
 import java.util.List;
 

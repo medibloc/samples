@@ -1,5 +1,6 @@
 package org.medibloc.insurance_java_ko;
 
+import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.crypto.AES256CTR;

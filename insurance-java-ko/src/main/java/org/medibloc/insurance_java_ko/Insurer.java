@@ -1,6 +1,8 @@
 package org.medibloc.insurance_java_ko;
 
 import com.google.protobuf.ByteString;
+import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
+import org.medibloc.insurance_java_ko.entities.UserEntity;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.core.HttpService;
