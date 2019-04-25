@@ -1,15 +1,28 @@
 package org.medibloc.insurance_java_ko;
 
+import com.google.protobuf.ByteString;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
+import org.medibloc.panacea.core.HttpService;
+import org.medibloc.panacea.core.Panacea;
+import org.medibloc.panacea.core.protobuf.BlockChain;
+import org.medibloc.panacea.core.protobuf.Rpc;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.utils.Numeric;
+import org.medibloc.phr.CertificateDataV1.Certificate;
+import org.medibloc.phr.CertificateDataV1Utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Insurer {
+    // MediBloc relay 서버 사용 시 BLOCKCHAIN_URL 을 medibloc relay 서버로 설정합니다.
+    private static final String BLOCKCHAIN_URL = "https://stg-testnet-node.medibloc.org";
+    private static final String ACCOUNT_REQUEST_TYPE_TAIL = "tail";
+
     private static final String MNEMONIC = "parade letter awesome much spread popular shed release holiday blind nation sunny";
     private static final BigInteger PRIVATE_KEY = new BigInteger("cf4c72d797e87dab70e63f34a266e5b085b01abc17a3c43299b1f78442dde316", 16);
     // address: 028f684cb16d7f53a58c9f2d24e9dd0315e13c33e446c8bb3a50369d6395014a1e
@@ -55,5 +68,69 @@ public class Insurer {
         setAccount(AccountUtils.loadAccount(savedFilePath));
 
         System.out.println("보험사 - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
+    }
+
+    /**
+     * CI 로 사용자 ID 를 조회하여, 해당 사용자 정보에 블록체인 account 를 등록 합니다.
+     */
+    public void signUp(Certificate certificate, String certificateTxHash) {
+        // tx 의 인증서 hash 와 일치 여부 확인
+        if (isUploadedOnBlockchain(certificate, certificateTxHash) != true) {
+            throw new RuntimeException("주어진 인증서가 해당 transaction 에 기록 되어 있지 않습니다.");
+        }
+
+        // 사용자 ID 와 블록체인 account 연계
+        UserEntity user = findUserWithCi(certificate.getCertification().getPersonCi());
+        if (user != null) {
+            user.setBlockchainAddress(certificate.getBlockchainAddress());
+        } else {
+            throw new RuntimeException("CI 가" + certificate.getCertification().getPersonCi() + " 인 사용자 정보를 찾을 수 없습니다.");
+        }
+    }
+
+    /**
+     * certificateTxHash 로 블록체인에서 transaction 을 조회 하고,
+     * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
+     */
+    private boolean isUploadedOnBlockchain(Certificate certificate, String certificateTxHash) {
+        // 주어진 인증서의 hash 깂
+        BlockChain.AddRecordPayload certificateHashPayload = BlockChain.AddRecordPayload.newBuilder()
+                .setHash(ByteString.copyFrom(CertificateDataV1Utils.hash(certificate)))
+                .build();
+        String certificateHash = Numeric.toHexStringNoPrefix(certificateHashPayload.toByteArray());
+
+        try {
+            Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
+            Rpc.Transaction transaction = panacea.getTransaction(certificateTxHash).send();
+
+            // 블록체인에 기록 된 인증서 hash 값
+            String certificateHashOnBlockchain = transaction.getPayload();
+
+            if (certificateHashOnBlockchain == null || certificateHashOnBlockchain.isEmpty()) {
+                throw new RuntimeException("Transaction payload is empty.");
+            }
+
+            return certificateHash.equals(certificateHashOnBlockchain);
+        } catch (IOException ex) {
+            throw new RuntimeException("Can not find the transaction " + certificateTxHash, ex);
+        }
+    }
+
+    private UserEntity findUserWithCi(String ci) {
+        for (UserEntity user: this.userList) {
+            if (ci.equals(user.getCi())) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    private UserEntity findUserWithBlockchainAddress(String address) {
+        for (UserEntity user: this.userList) {
+            if (address.equals(user.getBlockchainAddress())) {
+                return user;
+            }
+        }
+        return null;
     }
 }

@@ -28,7 +28,9 @@ public class Main {
         // 보험사 객체 생성. 생성자 내부적으로 mockup data 와 블록체인 계정을 생성 합니다.
         Insurer insurer = new Insurer();
 
-        // TODO 보험사에 사용자의 blockchain 주소 등록
+        // 보험사에 사용자의 blockchain 주소 등록
+        insurer.signUp(user.getCertificate(), user.getCertificateTxHash());
+        System.out.println("보험사 - 사용자 id 와 사용자의 블록체인 account 를 연계 하였습니다.");
 
         // TODO 계약 조회
 
