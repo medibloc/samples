@@ -44,6 +44,6 @@ public class Main {
         System.out.println("보험사 - 보험 청구를 접수 하였습니다.");
         System.out.println("<보험 청구 접수 정보>\n" + claimResponse);
 
-        // TODO 접수내역 업데이트 조회
+        // 접수내역 업데이트 조회
     }
 }
