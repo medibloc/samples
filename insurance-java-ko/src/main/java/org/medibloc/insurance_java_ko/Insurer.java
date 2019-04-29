@@ -23,7 +23,10 @@ import org.medibloc.phr.ClaimDataV1Utils;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Insurer {
@@ -97,6 +100,17 @@ public class Insurer {
         // tx 의 인증서 hash 와 일치 여부 확인
         if (isUploadedOnBlockchain(certificate, certificateTxHash) != true) {
             throw new RuntimeException("주어진 인증서가 해당 transaction 에 기록 되어 있지 않습니다.");
+        }
+
+        // 인증 만료일 확인
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date expiryDate = format.parse(certificate.getExpiryDate());
+            if (expiryDate.compareTo(new Date()) < 0) {
+                throw new RuntimeException("The certificate is expired.");
+            }
+        } catch (ParseException ex) {
+            throw new RuntimeException("Could not parse expiry date.", ex);
         }
 
         // 사용자 ID 와 블록체인 account 연계
