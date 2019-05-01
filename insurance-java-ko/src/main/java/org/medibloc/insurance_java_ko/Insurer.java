@@ -1,10 +1,13 @@
 package org.medibloc.insurance_java_ko;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.protobuf.ByteString;
 import org.medibloc.insurance_java_ko.entities.ClaimRequest;
 import org.medibloc.insurance_java_ko.entities.ClaimResponse;
 import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
 import org.medibloc.insurance_java_ko.entities.UserEntity;
+import org.medibloc.insurance_java_ko.utils.ClaimDeserializer;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.core.HttpService;
@@ -41,6 +44,13 @@ public class Insurer {
     private static final String PASSWORD = "insurerPassWord123!";
 
     private static final String ACCOUNT_FILE_PATH = "sample_accounts";
+
+    protected static final ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(Claim.class, new ClaimDeserializer());
+        objectMapper.registerModule(module);
+    }
 
     private List<UserEntity> userList;
 
@@ -139,13 +149,18 @@ public class Insurer {
 
     public ClaimResponse sendClaim(String userBlockchainAddress, String encryptedClaimRequest) throws Exception {
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), userBlockchainAddress);
-        // TODO ClaimRequest claimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
-        ClaimRequest claimRequest = new ClaimRequest();
+        String jsonClaimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
+        ClaimRequest claimRequest = objectMapper.readValue(jsonClaimRequest, ClaimRequest.class);
 
-        isUploadedOnBlockchain(claimRequest.getClaim(), claimRequest.getClaimTxHash());
+        // TODO : send valid claim
+        if (isUploadedOnBlockchain(claimRequest.getClaim(), claimRequest.getClaimTxHash()) != true) {
+            throw new RuntimeException("주어진 청구 정보가 해당 transaction 에 기록 되어 있지 않습니다.");
+        }
 
         ClaimResponse response = new ClaimResponse();
         response.setSuccess(true);
+        // TODO : set fields
+
         return response;
     }
 

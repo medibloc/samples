@@ -1,5 +1,9 @@
 package org.medibloc.insurance_java_ko;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import org.medibloc.insurance_java_ko.entities.ClaimRequest;
 import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
 import org.medibloc.panacea.account.Account;
@@ -109,9 +113,9 @@ public class User {
         request.setIsMedicalCareRecipient(true);
         request.setMedicalCareRecipientType(1);
         request.setClaimTxHash("84d64213b4f27a915f29957b996d92972bae95973cb6d4ba64d32ab6cb9bcb93");
-        request.setClaim(getClaim());
+        request.setClaim(getJsonClaim());
 
-        String jsonRequest = request.toString(); // TODO
+        String jsonRequest = new ObjectMapper().writeValueAsString(request);
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), insurerBlockchainAddress);
         return AES256CTR.encryptData(sharedSecretKey, jsonRequest);
     }
@@ -197,5 +201,10 @@ public class User {
                 .addDiagnoses(diagnosisBuilder2);
 
         return ClaimDataV1Utils.fillClaim(partialClaim);
+    }
+
+    private String getJsonClaim() throws InvalidProtocolBufferException {
+        Claim claim = getClaim();
+        return JsonFormat.printer().print(claim);
     }
 }

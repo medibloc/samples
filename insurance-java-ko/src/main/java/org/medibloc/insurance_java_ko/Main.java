@@ -41,12 +41,10 @@ public class Main {
         List<InsuranceEntity> insuranceEntityList = insurer.getInsuranceList(user.getAddress(), encryptedAccidentDate);
         user.setInsuranceEntityList(insuranceEntityList);
         System.out.println("보험사 - 보험 계약상품 정보를 사용자에게 반환 하였습니다.");
-        System.out.println("<보험 계약상품 정보>\n" + user.getInsuranceEntityList());
 
         // 청구 접수
         ClaimResponse claimResponse = insurer.sendClaim(user.getAddress(), user.getEncryptedClaimRequest(insurer.getAddress()));
         System.out.println("보험사 - 보험 청구를 접수 하였습니다.");
-        System.out.println("<보험 청구 접수 정보>\n" + claimResponse);
 
         // 접수내역 업데이트 조회
         // TODO
