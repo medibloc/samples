@@ -1,8 +1,11 @@
 package org.medibloc.insurance_java_ko;
 
 import org.medibloc.insurance_java_ko.entities.ClaimResponse;
+import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1.Certification;
+
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -35,7 +38,8 @@ public class Main {
 
         // 계약 조회
         String encryptedAccidentDate = user.getEncryptedAccidentDate(insurer.getAddress());
-        user.setInsuranceEntityList(insurer.getInsuranceList(user.getAddress(), encryptedAccidentDate));
+        List<InsuranceEntity> insuranceEntityList = insurer.getInsuranceList(user.getAddress(), encryptedAccidentDate);
+        user.setInsuranceEntityList(insuranceEntityList);
         System.out.println("보험사 - 보험 계약상품 정보를 사용자에게 반환 하였습니다.");
         System.out.println("<보험 계약상품 정보>\n" + user.getInsuranceEntityList());
 

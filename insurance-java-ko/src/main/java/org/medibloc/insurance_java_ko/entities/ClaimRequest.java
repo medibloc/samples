@@ -22,7 +22,7 @@ public class ClaimRequest {
     /** 보험청구 진행 알림 방법 */
     private String informType;
     /** 의료급여 수급권자 여부 */
-    private String isMedicalCareRecipient;
+    private boolean isMedicalCareRecipient;
     /** 의료급여 수급권자 구분 */
     private int medicalCareRecipientType;
     /** 청구 데이터 transaction hash */
@@ -112,11 +112,11 @@ public class ClaimRequest {
     }
 
     /** 의료급여 수급권자 여부 */
-    public String getIsMedicalCareRecipient() {
+    public boolean getIsMedicalCareRecipient() {
         return isMedicalCareRecipient;
     }
 
-    public void setIsMedicalCareRecipient(String isMedicalCareRecipient) {
+    public void setIsMedicalCareRecipient(boolean isMedicalCareRecipient) {
         this.isMedicalCareRecipient = isMedicalCareRecipient;
     }
 

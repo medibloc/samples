@@ -58,6 +58,7 @@ public class User {
         return insuranceEntityList;
     }
 
+    /** 사고일 당시 계약상태였던 보험 목록을 설정 합니다. */
     public void setInsuranceEntityList(List<InsuranceEntity> insuranceEntityList) {
         this.insuranceEntityList = insuranceEntityList;
     }
@@ -96,7 +97,17 @@ public class User {
 
     public String getEncryptedClaimRequest(String insurerBlockchainAddress) throws Exception {
         ClaimRequest request = new ClaimRequest();
-        // TODO : set fields
+        request.setInsuranceCode(getInsuranceEntityList().get(0).getInsuranceCode());
+        request.setAccidentType("disease");
+        request.setAccidentDate("20181206");
+        request.setAccidentDetail("결장염");
+        request.setAccountBankCode("0023");
+        request.setAccountBankName("국민은행");
+        request.setAccountNumber("1234567890");
+        request.setAccountHolder("홍길동");
+        request.setInformType("sms");
+        request.setIsMedicalCareRecipient(true);
+        request.setMedicalCareRecipientType(1);
         request.setClaimTxHash("84d64213b4f27a915f29957b996d92972bae95973cb6d4ba64d32ab6cb9bcb93");
         request.setClaim(getClaim());
 
