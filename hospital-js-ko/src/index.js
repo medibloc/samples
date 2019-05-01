@@ -41,11 +41,13 @@ const run = async () => {
 
   // 병원이 청구서, signed tx 생성하여 사용자(환자)에게 전달
   const claim = hospital.getClaim(user.getToken());
-  const claimTransactionRequest = hospital.getSignedTransaction(claim);
+  const claimTransactionRequest = await hospital.getSignedTransaction(claim);
   console.log('병원 - 환자의 진료 청구서에 sign 하였습니다.');
 
   user.claim = claim;
   user.claimTxRequest = claimTransactionRequest;
+
+  console.log(user.claimTxRequest);
 };
 
 run();
