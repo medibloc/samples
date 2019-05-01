@@ -96,11 +96,13 @@ public class User {
 
     public String getEncryptedClaimRequest(String insurerBlockchainAddress) throws Exception {
         ClaimRequest request = new ClaimRequest();
+        // TODO : set fields
         request.setClaimTxHash("84d64213b4f27a915f29957b996d92972bae95973cb6d4ba64d32ab6cb9bcb93");
         request.setClaim(getClaim());
 
+        String jsonRequest = request.toString(); // TODO
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), insurerBlockchainAddress);
-        return AES256CTR.encryptData(sharedSecretKey, request.toString());
+        return AES256CTR.encryptData(sharedSecretKey, jsonRequest);
     }
 
     private Claim getClaim() {

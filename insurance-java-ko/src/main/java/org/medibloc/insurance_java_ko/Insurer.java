@@ -69,7 +69,7 @@ public class Insurer {
 
         List<InsuranceEntity> sampleInsuranceEntityList = new ArrayList<InsuranceEntity>();
         sampleInsuranceEntityList.add(new InsuranceEntity("0001", "실손의료비보험", "홍길동", null));
-        sampleInsuranceEntityList.add(new InsuranceEntity("0002", "애니카자동차보험", "홍길동", "김철수"));
+        sampleInsuranceEntityList.add(new InsuranceEntity("0002", "자동차보험", "홍길동", "김철수"));
         userList.add(new UserEntity("12345678", "홍길동", "136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2", sampleInsuranceEntityList));
 
         /** 블록체인 account 생성, 저장, 불러오기 **/
