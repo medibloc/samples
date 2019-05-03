@@ -2,10 +2,9 @@ package org.medibloc.insurance_java_ko;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
 import org.medibloc.insurance_java_ko.entities.ClaimRequest;
 import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
+import org.medibloc.insurance_java_ko.utils.ClaimSerializer;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.crypto.AES256CTR;
@@ -13,7 +12,10 @@ import org.medibloc.panacea.crypto.ECKeyPair;
 import org.medibloc.panacea.crypto.Keys;
 import org.medibloc.phr.CertificateDataV1.Certificate;
 import org.medibloc.phr.CertificateDataV1.Certification;
-import org.medibloc.phr.ClaimDataV1.*;
+import org.medibloc.phr.ClaimDataV1.Claim;
+import org.medibloc.phr.ClaimDataV1.Diagnosis;
+import org.medibloc.phr.ClaimDataV1.FeeItem;
+import org.medibloc.phr.ClaimDataV1.Receipt;
 import org.medibloc.phr.ClaimDataV1Utils;
 
 import java.math.BigInteger;
@@ -25,6 +27,13 @@ public class User {
     // address: 03107c5eae25e0443be09496162362fee885402379ee4c0fca30af8dbaa340e507
     private static final BigInteger PUBLIC_KEY = new BigInteger("107c5eae25e0443be09496162362fee885402379ee4c0fca30af8dbaa340e507933890e0c8f931351a9a37d7a151d1e8d9620b55adbe7a5e8663a4cea843f887", 16);
     private static final String PASSWORD = "userPassWord123!";
+
+    protected static final ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Claim.class, new ClaimSerializer());
+        objectMapper.registerModule(module);
+    }
 
     private ECKeyPair ecKeyPair;
     private Account account;
@@ -113,9 +122,9 @@ public class User {
         request.setIsMedicalCareRecipient(true);
         request.setMedicalCareRecipientType(1);
         request.setClaimTxHash("84d64213b4f27a915f29957b996d92972bae95973cb6d4ba64d32ab6cb9bcb93");
-        request.setClaim(getJsonClaim());
+        request.setClaim(getClaim());
 
-        String jsonRequest = new ObjectMapper().writeValueAsString(request);
+        String jsonRequest = objectMapper.writeValueAsString(request);
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), insurerBlockchainAddress);
         return AES256CTR.encryptData(sharedSecretKey, jsonRequest);
     }
@@ -201,10 +210,5 @@ public class User {
                 .addDiagnoses(diagnosisBuilder2);
 
         return ClaimDataV1Utils.fillClaim(partialClaim);
-    }
-
-    private String getJsonClaim() throws InvalidProtocolBufferException {
-        Claim claim = getClaim();
-        return JsonFormat.printer().print(claim);
     }
 }

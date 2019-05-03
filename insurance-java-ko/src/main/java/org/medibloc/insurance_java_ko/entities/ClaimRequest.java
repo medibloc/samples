@@ -28,7 +28,7 @@ public class ClaimRequest {
     /** 청구 데이터 transaction hash */
     private String claimTxHash;
     /** 청구 데이터 */
-    private String claim;
+    private Claim claim;
 
     /** 보험 계약 코드 */
     public String getInsuranceCode() {
@@ -139,11 +139,11 @@ public class ClaimRequest {
     }
 
     /** 청구 데이터 */
-    public String getClaim() {
+    public Claim getClaim() {
         return claim;
     }
 
-    public void setClaim(String claim) {
+    public void setClaim(Claim claim) {
         this.claim = claim;
     }
 }
