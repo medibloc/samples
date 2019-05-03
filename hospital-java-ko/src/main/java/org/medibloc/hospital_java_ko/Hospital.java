@@ -281,6 +281,15 @@ public class Hospital {
     }
 
     /**
+     * 병원의 개인키로 sign 한 청구서를 블록체인에 기록 합니다.
+     */
+    public String sendClaim(Rpc.SendTransactionRequest transactionRequest) throws Exception {
+        Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
+        Rpc.TransactionHash resultHash = panacea.sendTransaction(transactionRequest).send();
+        return resultHash.getHash();
+    }
+
+    /**
      * certificateTxHash 로 블록체인에서 transaction 을 조회 하고,
      * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
      */
