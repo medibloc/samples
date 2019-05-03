@@ -152,14 +152,16 @@ public class Insurer {
         String jsonClaimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
         ClaimRequest claimRequest = objectMapper.readValue(jsonClaimRequest, ClaimRequest.class);
 
-        // TODO : send valid claim
         if (isUploadedOnBlockchain(claimRequest.getClaim(), claimRequest.getClaimTxHash()) != true) {
             throw new RuntimeException("주어진 청구 정보가 해당 transaction 에 기록 되어 있지 않습니다.");
         }
 
         ClaimResponse response = new ClaimResponse();
         response.setSuccess(true);
-        // TODO : set fields
+        response.setMessage("success");
+        response.setClaimNumber(Long.toString(System.currentTimeMillis() % 100000));
+        response.setClaimDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        response.setClaimStatus("receipt");
 
         return response;
     }

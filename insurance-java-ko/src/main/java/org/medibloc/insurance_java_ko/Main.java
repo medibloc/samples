@@ -45,6 +45,7 @@ public class Main {
         // 청구 접수
         ClaimResponse claimResponse = insurer.sendClaim(user.getAddress(), user.getEncryptedClaimRequest(insurer.getAddress()));
         System.out.println("보험사 - 보험 청구를 접수 하였습니다.");
+        System.out.println("       접수번호: " + claimResponse.getClaimNumber() + "  접수일: " + claimResponse.getClaimDate());
 
         // 접수내역 업데이트 조회
         // TODO
