@@ -121,7 +121,7 @@ public class User {
         request.setInformType("sms");
         request.setIsMedicalCareRecipient(true);
         request.setMedicalCareRecipientType(1);
-        request.setClaimTxHash("9073b116027faf5d7721707aa0e53d521658db8543eb431a42daa78c889bcbc1");
+        request.setClaimTxHash("8a1af4deb9ebd96874523476f9cdba1f3da8ef4f4e5796a1f47dbcd0a0323070");
         request.setClaim(getClaim());
 
         String jsonRequest = objectMapper.writeValueAsString(request);
