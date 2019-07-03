@@ -4,7 +4,7 @@ public class Bill {
     String billNo;
     Receipt[] receipts;
     FeeDetail[] feeDetails;
-    Diagnoses[] diagnosis;
+    Diagnosis[] diagnoses;
 
     public class Receipt {
         String receiptNo;
@@ -79,7 +79,7 @@ public class Bill {
         String uncoveredFee;
     }
 
-    public class Diagnoses {
+    public class Diagnosis {
         String diagnosisCodeVersion;
         String diagnosisCodeType;
         String diagnosisCode;
