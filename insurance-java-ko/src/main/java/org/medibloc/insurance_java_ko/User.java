@@ -130,11 +130,11 @@ public class User {
     }
 
     private Claim getClaim() {
-        /*** Claim ***/
+        /*** Bill ***/
         Claim.Builder claimBuilder = Claim.newBuilder();
         claimBuilder.setClaimNo("20181204-S1284");
 
-        /*** Claim.Receipts ***/
+        /*** Bill.Receipts ***/
         Receipt.Builder receiptBuilder = Receipt.newBuilder();
         receiptBuilder.setReceiptNo("20181204-S1284");
         receiptBuilder.setReceiptType("I");
@@ -161,7 +161,7 @@ public class User {
         receiptBuilder.setCashPayAmount("0");
         receiptBuilder.setCardPayAmount("21000");
 
-        /*** Claim.Receipt.FeeItems ***/
+        /*** Bill.Receipt.FeeItems ***/
         receiptBuilder.addFeeItems(FeeItem.newBuilder()
                 .setFeeItemName("초진 진찰료")
                 .setFeeItemCode("")
@@ -193,7 +193,7 @@ public class User {
                 .setUncoveredChosenFee("20000")
                 .setUncoveredUnchosenFee("0"));
 
-        /*** Claim.Diagnoses ***/
+        /*** Bill.Diagnoses ***/
         Diagnosis.Builder diagnosisBuilder1 = Diagnosis.newBuilder();
         diagnosisBuilder1.setDiagnosisCodeVersion("ICD-10-2016");
         diagnosisBuilder1.setDiagnosisCodeType(10); // 주상병
