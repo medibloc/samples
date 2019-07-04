@@ -3,6 +3,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,5 +23,5 @@ public class FeeDetail {
     String requesterRelationType;
     String hospitalName;
     String companyRegistrationNo;
-    FeeItem[] feeItems;
+    List<FeeItem> feeItems;
 }

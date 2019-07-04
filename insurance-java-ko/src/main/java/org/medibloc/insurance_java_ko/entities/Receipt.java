@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -48,6 +50,6 @@ public class Receipt {
     String hospitalPhoneNo;
     String hospitalAddress;
     String hospitalRepresentative;
-    ReceiptItem[] receiptItems;
-    ReceiptEtcItem[] receiptEtcItems;
+    List<ReceiptItem> receiptItems;
+    List<ReceiptEtcItem> receiptEtcItems;
 }

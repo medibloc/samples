@@ -1,5 +1,7 @@
 package org.medibloc.insurance_java_ko;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.medibloc.insurance_java_ko.entities.Certification;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.core.HttpService;
@@ -7,10 +9,8 @@ import org.medibloc.panacea.core.Panacea;
 import org.medibloc.panacea.core.protobuf.BlockChain;
 import org.medibloc.panacea.core.protobuf.Rpc;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.crypto.Hash;
 import org.medibloc.panacea.tx.Transaction;
-import org.medibloc.phr.CertificateDataV1.Certificate;
-import org.medibloc.phr.CertificateDataV1.Certification;
-import org.medibloc.phr.CertificateDataV1Utils;
 
 import java.math.BigInteger;
 
@@ -33,19 +33,24 @@ public class MediBloc {
         System.out.println("MediBloc - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
     }
 
-    public Certificate generateCertificate(String address, Certification.Builder certificationBuilder) {
-        Certificate.Builder certificateBuilder = Certificate.newBuilder()
-                .setBlockchainAddress(address) // user's blockchain address
-                .setExpiryDate("2099-07-01 15:01:20")
-                .setCertification(certificationBuilder);
-
-        return CertificateDataV1Utils.fillCertificate(certificateBuilder);
+    public Certification generateCertificate(String address, Certification certification) {
+        return new Certification(address      // user's blockchain address
+                , System.currentTimeMillis()  // expiry date
+                , certification.getName()
+                , certification.getBirth()
+                , certification.getGender()
+                , certification.getCi()
+                , certification.getMobileProvider()
+                , certification.getMobileNumber());
     }
 
-    public String sendCertificate(Certificate certificate) throws Exception {
+    public String sendCertificate(Certification certification) throws Exception {
         Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
 
-        byte[] certificateHash = CertificateDataV1Utils.hash(certificate);
+        String jsonCertification = new ObjectMapper().writeValueAsString(certification);
+        System.out.println("MediBloc - 사용자의 본인인증 결과 json: " + jsonCertification);
+
+        byte[] certificateHash = Hash.sha3256(jsonCertification.getBytes());
 
         Rpc.GetAccountRequest accountRequest = Rpc.GetAccountRequest.newBuilder()
                 .setAddress(this.account.getAddress())

@@ -1,9 +1,8 @@
 package org.medibloc.insurance_java_ko;
 
+import org.medibloc.insurance_java_ko.entities.Certification;
 import org.medibloc.insurance_java_ko.entities.ClaimResponse;
 import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
-import org.medibloc.phr.CertificateDataV1.Certificate;
-import org.medibloc.phr.CertificateDataV1.Certification;
 
 import java.util.List;
 
@@ -14,17 +13,17 @@ public class Main {
 
         // 사용자 본인인증 수행
         User user = new User();
-        Certification.Builder certificationBuilder = user.certify();
+        Certification incompleteCertification = user.certify();
         System.out.println("사용자 - 본인인증을 수행 하였습니다.");
 
         // 본인인증 결과를 블록체인에 기록
-        Certificate certificate = mediBloc.generateCertificate(user.getAddress(), certificationBuilder);
-        String certificateTxHash = mediBloc.sendCertificate(certificate);
+        Certification certification = mediBloc.generateCertificate(user.getAddress(), incompleteCertification);
+        String certificateTxHash = mediBloc.sendCertificate(certification);
         System.out.println("MediBloc - 사용자의 본인인증 결과를 블록체인에 기록 하였습니다.");
         System.out.println("           transaction 조회: https://stg-testnet-node.medibloc.org/v1/transaction?hash=" + certificateTxHash);
 
         // MediBloc 이 사용자에게 인증서, tx hash 반환
-        user.setCertificate(certificate);
+        user.setCertification(certification);
         user.setCertificateTxHash(certificateTxHash);
 
         Thread.sleep(5000);
@@ -33,7 +32,7 @@ public class Main {
         Insurer insurer = new Insurer();
 
         // 보험사에 사용자의 blockchain 주소 등록
-        insurer.signUp(user.getCertificate(), user.getCertificateTxHash());
+        insurer.signUp(user.getCertification(), user.getCertificateTxHash());
         System.out.println("보험사 - 사용자 id 와 사용자의 블록체인 account 를 연계 하였습니다.");
 
         // 계약 조회

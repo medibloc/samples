@@ -3,12 +3,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 public class Bill {
     String billNo;
-    Receipt[] receipts;
+    List<Receipt> receipts;
     FeeDetail feeDetail;
-    Diagnosis[] diagnoses;
+    List<Diagnosis> diagnoses;
 }

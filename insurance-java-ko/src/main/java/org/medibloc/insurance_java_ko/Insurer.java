@@ -1,13 +1,9 @@
 package org.medibloc.insurance_java_ko;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.protobuf.ByteString;
-import org.medibloc.insurance_java_ko.entities.ClaimRequest;
-import org.medibloc.insurance_java_ko.entities.ClaimResponse;
-import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
-import org.medibloc.insurance_java_ko.entities.UserEntity;
-import org.medibloc.insurance_java_ko.utils.ClaimDeserializer;
+import org.medibloc.insurance_java_ko.entities.*;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.core.HttpService;
@@ -16,17 +12,13 @@ import org.medibloc.panacea.core.protobuf.BlockChain;
 import org.medibloc.panacea.core.protobuf.Rpc;
 import org.medibloc.panacea.crypto.AES256CTR;
 import org.medibloc.panacea.crypto.ECKeyPair;
+import org.medibloc.panacea.crypto.Hash;
 import org.medibloc.panacea.crypto.Keys;
 import org.medibloc.panacea.utils.Numeric;
-import org.medibloc.phr.CertificateDataV1.Certificate;
-import org.medibloc.phr.CertificateDataV1Utils;
-import org.medibloc.phr.ClaimDataV1.Claim;
-import org.medibloc.phr.ClaimDataV1Utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,13 +36,6 @@ public class Insurer {
     private static final String PASSWORD = "insurerPassWord123!";
 
     private static final String ACCOUNT_FILE_PATH = "sample_accounts";
-
-    protected static final ObjectMapper objectMapper = new ObjectMapper();
-    static {
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(Claim.class, new ClaimDeserializer());
-        objectMapper.registerModule(module);
-    }
 
     private List<UserEntity> userList;
 
@@ -106,29 +91,27 @@ public class Insurer {
     /**
      * CI 로 사용자 ID 를 조회하여, 해당 사용자 정보에 블록체인 account 를 등록 합니다.
      */
-    public void signUp(Certificate certificate, String certificateTxHash) {
+    public void signUp(Certification certification, String certificateTxHash) {
         // tx 의 인증서 hash 와 일치 여부 확인
-        if (isUploadedOnBlockchain(certificate, certificateTxHash) != true) {
-            throw new RuntimeException("주어진 인증서가 해당 transaction 에 기록 되어 있지 않습니다.");
+        try {
+            if (isUploadedOnBlockchain(certification, certificateTxHash) != true) {
+                throw new RuntimeException("주어진 인증서가 해당 transaction 에 기록 되어 있지 않습니다.");
+            }
+        } catch (JsonProcessingException jpEx) {
+            throw new RuntimeException("Json 변환 시 오류가 발생 하였습니다.", jpEx);
         }
 
         // 인증 만료일 확인
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            Date expiryDate = format.parse(certificate.getExpiryDate());
-            if (expiryDate.compareTo(new Date()) < 0) {
-                throw new RuntimeException("The certificate is expired.");
-            }
-        } catch (ParseException ex) {
-            throw new RuntimeException("Could not parse expiry date.", ex);
+        if (System.currentTimeMillis() > certification.getExpireTime()) {
+            throw new RuntimeException("The certificate is expired.");
         }
 
         // 사용자 ID 와 블록체인 account 연계
-        UserEntity user = findUserWithCi(certificate.getCertification().getPersonCi());
+        UserEntity user = findUserWithCi(certification.getCi());
         if (user != null) {
-            user.setBlockchainAddress(certificate.getBlockchainAddress());
+            user.setBlockchainAddress(certification.getBcAddress());
         } else {
-            throw new RuntimeException("CI 가" + certificate.getCertification().getPersonCi() + " 인 사용자 정보를 찾을 수 없습니다.");
+            throw new RuntimeException("CI 가" + certification.getCi() + " 인 사용자 정보를 찾을 수 없습니다.");
         }
     }
 
@@ -150,9 +133,9 @@ public class Insurer {
     public ClaimResponse sendClaim(String userBlockchainAddress, String encryptedClaimRequest) throws Exception {
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), userBlockchainAddress);
         String jsonClaimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
-        ClaimRequest claimRequest = objectMapper.readValue(jsonClaimRequest, ClaimRequest.class);
+        ClaimRequest claimRequest = new ObjectMapper().readValue(jsonClaimRequest, ClaimRequest.class);
 
-        if (isUploadedOnBlockchain(claimRequest.getClaim(), claimRequest.getClaimTxHash()) != true) {
+        if (isUploadedOnBlockchain(claimRequest.getBill(), claimRequest.getClaimTxHash()) != true) {
             throw new RuntimeException("주어진 청구 정보가 해당 transaction 에 기록 되어 있지 않습니다.");
         }
 
@@ -167,34 +150,16 @@ public class Insurer {
     }
 
     /**
-     * certificateTxHash 로 블록체인에서 transaction 을 조회 하고,
+     * txHash 로 블록체인에서 transaction 을 조회 하고,
      * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
      */
-    private boolean isUploadedOnBlockchain(Certificate certificate, String certificateTxHash) {
-        // 주어진 인증서의 hash 깂
-        BlockChain.AddRecordPayload certificateHashPayload = BlockChain.AddRecordPayload.newBuilder()
-                .setHash(ByteString.copyFrom(CertificateDataV1Utils.hash(certificate)))
+    private boolean isUploadedOnBlockchain(Object data, String txHash) throws JsonProcessingException{
+        String jsonData = new ObjectMapper().writeValueAsString(data);
+        BlockChain.AddRecordPayload dataHashPayload = BlockChain.AddRecordPayload.newBuilder()
+                .setHash(ByteString.copyFrom(Hash.sha3256(jsonData.getBytes())))
                 .build();
-        String certificateHash = Numeric.toHexStringNoPrefix(certificateHashPayload.toByteArray());
+        String dataHash = Numeric.toHexStringNoPrefix(dataHashPayload.toByteArray());
 
-        return isUploadedOnBlockchain(certificateHash, certificateTxHash);
-    }
-
-    /**
-     * claimTxHash 로 블록체인에서 transaction 을 조회 하고,
-     * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
-     */
-    private boolean isUploadedOnBlockchain(Claim claim, String claimTxHash) {
-        // 주어진 인증서의 hash 깂
-        BlockChain.AddRecordPayload claimHashPayload = BlockChain.AddRecordPayload.newBuilder()
-                .setHash(ByteString.copyFrom(ClaimDataV1Utils.hash(claim)))
-                .build();
-        String claimHash = Numeric.toHexStringNoPrefix(claimHashPayload.toByteArray());
-
-        return isUploadedOnBlockchain(claimHash, claimTxHash);
-    }
-
-    private boolean isUploadedOnBlockchain(String dataHash, String txHash) {
         try {
             Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
             Rpc.Transaction transaction = panacea.getTransaction(txHash).send();

@@ -1,24 +1,15 @@
 package org.medibloc.insurance_java_ko;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.medibloc.insurance_java_ko.entities.ClaimRequest;
-import org.medibloc.insurance_java_ko.entities.InsuranceEntity;
-import org.medibloc.insurance_java_ko.utils.ClaimSerializer;
+import org.medibloc.insurance_java_ko.entities.*;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.crypto.AES256CTR;
 import org.medibloc.panacea.crypto.ECKeyPair;
 import org.medibloc.panacea.crypto.Keys;
-import org.medibloc.phr.CertificateDataV1.Certificate;
-import org.medibloc.phr.CertificateDataV1.Certification;
-import org.medibloc.phr.ClaimDataV1.Claim;
-import org.medibloc.phr.ClaimDataV1.Diagnosis;
-import org.medibloc.phr.ClaimDataV1.FeeItem;
-import org.medibloc.phr.ClaimDataV1.Receipt;
-import org.medibloc.phr.ClaimDataV1Utils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -28,17 +19,10 @@ public class User {
     private static final BigInteger PUBLIC_KEY = new BigInteger("107c5eae25e0443be09496162362fee885402379ee4c0fca30af8dbaa340e507933890e0c8f931351a9a37d7a151d1e8d9620b55adbe7a5e8663a4cea843f887", 16);
     private static final String PASSWORD = "userPassWord123!";
 
-    protected static final ObjectMapper objectMapper = new ObjectMapper();
-    static {
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(Claim.class, new ClaimSerializer());
-        objectMapper.registerModule(module);
-    }
-
     private ECKeyPair ecKeyPair;
     private Account account;
 
-    private Certificate certificate;
+    private Certification certification;
     private String certificateTxHash;
 
     private List<InsuranceEntity> insuranceEntityList;
@@ -51,12 +35,12 @@ public class User {
         return this.account.getAddress();
     }
 
-    public void setCertificate(Certificate certificate) {
-        this.certificate = certificate;
+    public void setCertification(Certification certification) {
+        this.certification = certification;
     }
 
-    public Certificate getCertificate() {
-        return this.certificate;
+    public Certification getCertification() {
+        return this.certification;
     }
 
     public void setCertificateTxHash(String certificateTxHash) {
@@ -83,22 +67,22 @@ public class User {
         System.out.println("사용자 - 초기화를 완료 하였습니다. Blockchain address: " + this.account.getAddress());
     }
 
-    public Certification.Builder certify() {
-        return Certification.newBuilder()
-                .setCertificationResult("success")
-                .setPersonName("홍길동")
-                .setPersonBirthdate("19750101")
-                .setPersonGender("1")
-                .setPersonNation("0")
-                .setPersonCi("136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2")
-                .setPersonMobileCompany("ABC")
-                .setPersonMobileNumber("01012345678");
+    public Certification certify() {
+        return new Certification(
+                null
+                , -1
+                , "홍길동"
+                , "19750101"
+                , 1
+                , "136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2"
+                , 1 // SKT
+                , "01012345678");
     }
 
     public String getEncryptedAccidentDate(String insurerBlockchainAddress) throws Exception {
         // claim data 에 해당하는 사고일(청구데이터 중 최초진료일)
         String accidentDate = "99999999";
-        for (Receipt receipt : getClaim().getReceiptsList()) {
+        for (Receipt receipt : getBill().getReceipts()) {
             if (receipt.getTreatmentStartDate().compareTo(accidentDate) < 0) {
                 accidentDate = receipt.getTreatmentStartDate();
             }
@@ -108,107 +92,154 @@ public class User {
         return AES256CTR.encryptData(sharedSecretKey, accidentDate);
     }
 
+    /* '사고내용 + 청구서' 를 암호화 하여 반환 합니다. */
     public String getEncryptedClaimRequest(String insurerBlockchainAddress) throws Exception {
-        ClaimRequest request = new ClaimRequest();
-        request.setInsuranceCode(getInsuranceEntityList().get(0).getInsuranceCode());
-        request.setAccidentType("disease");
-        request.setAccidentDate("20181206");
-        request.setAccidentDetail("결장염");
-        request.setAccountBankCode("0023");
-        request.setAccountBankName("국민은행");
-        request.setAccountNumber("1234567890");
-        request.setAccountHolder("홍길동");
-        request.setInformType("sms");
-        request.setIsMedicalCareRecipient(true);
-        request.setMedicalCareRecipientType(1);
-        request.setClaimTxHash("8a1af4deb9ebd96874523476f9cdba1f3da8ef4f4e5796a1f47dbcd0a0323070");
-        request.setClaim(getClaim());
+        ClaimRequest request = new ClaimRequest(
+                getInsuranceEntityList().get(0).getInsuranceCode()
+                , "disease"
+                , "20181206"
+                , "결장염"
+                , "0023"
+                , "국민은행"
+                , "1234567890"
+                , "홍길동"
+                , "sms"
+                , true
+                , 1
+                , "8a1af4deb9ebd96874523476f9cdba1f3da8ef4f4e5796a1f47dbcd0a0323070"
+                , getBill()
+        );
 
-        String jsonRequest = objectMapper.writeValueAsString(request);
+        String jsonRequest = new ObjectMapper().writeValueAsString(request);
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), insurerBlockchainAddress);
         return AES256CTR.encryptData(sharedSecretKey, jsonRequest);
     }
 
-    private Claim getClaim() {
+    private Bill getBill() {
+        /* Bill.Receipts.ReceiptItems */
+        List<ReceiptItem> receiptItems = new ArrayList<ReceiptItem>();
+        receiptItems.add(new ReceiptItem(
+                null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+        ));
+
+        /* Bill.Receipts.ReceiptEtcItems */
+        List<ReceiptEtcItem> receiptEtcItems = new ArrayList<ReceiptEtcItem>();
+        receiptEtcItems.add(new ReceiptEtcItem(
+           null
+                , null
+                , null
+        ));
+
+        /* Bill.Receipts */
+        List<Receipt> receipts = new ArrayList<Receipt>();
+        receipts.add(new Receipt(
+                null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , receiptItems
+                , receiptEtcItems
+        ));
+
+        /* Bill.FeeDetail.FeeItems */
+        List<FeeItem> feeItems = new ArrayList<FeeItem>();
+        feeItems.add(new FeeItem(
+                null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+        ));
+
+        /* Bill.FeeDetail */
+        FeeDetail feeDetail = new FeeDetail(
+                null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+                , null
+        );
+
+        /* Bill.diagnoses */
+        List<Diagnosis> diagnoses = new ArrayList<Diagnosis>();
+        diagnoses.add(new Diagnosis(
+                "ICD-10-2016"
+                , "10" // 주상병
+                , "J00"
+        ));
+        diagnoses.add(new Diagnosis(
+                "KCD-7"
+                , "20" // 부상병
+                , "J30.3"
+        ));
+
         /*** Bill ***/
-        Claim.Builder claimBuilder = Claim.newBuilder();
-        claimBuilder.setClaimNo("20181204-S1284");
-
-        /*** Bill.Receipts ***/
-        Receipt.Builder receiptBuilder = Receipt.newBuilder();
-        receiptBuilder.setReceiptNo("20181204-S1284");
-        receiptBuilder.setReceiptType("I");
-        receiptBuilder.setPatientNo("12345678");
-        receiptBuilder.setPatientName("홍길동");
-        receiptBuilder.setCompanyRegistrationNo("11100999");
-        receiptBuilder.setTreatmentStartDate("2018-12-06");
-        receiptBuilder.setTreatmentEndDate("2018-12-06");
-        receiptBuilder.setTreatmentDepartment("피부과");
-        receiptBuilder.setTreatmentDepartmentCode("DER");
-        receiptBuilder.setTreatmentType("");
-        receiptBuilder.setTreatmentTypeCode("");
-        receiptBuilder.setCoveredFee("11000");
-        receiptBuilder.setUncoveredFee("20000");
-        receiptBuilder.setUpperLimitExcess("0");
-        receiptBuilder.setPayTotal("31000");
-        receiptBuilder.setPatientPayTotal("21000");
-        receiptBuilder.setDeductAmount("0");
-        receiptBuilder.setAdvancePayAmount("0");
-        receiptBuilder.setPayAmount("21000");
-        receiptBuilder.setUncollectedPayAmount("0");
-        receiptBuilder.setReceiptAmount("21000");
-        receiptBuilder.setSurtaxAmount("0");
-        receiptBuilder.setCashPayAmount("0");
-        receiptBuilder.setCardPayAmount("21000");
-
-        /*** Bill.Receipt.FeeItems ***/
-        receiptBuilder.addFeeItems(FeeItem.newBuilder()
-                .setFeeItemName("초진 진찰료")
-                .setFeeItemCode("")
-                .setTreatmentDate("2018-12-06")
-                .setCoveredType("")
-                .setMedicalChargeCode("AA157")
-                .setPrice("11000")
-                .setQuantity("1")
-                .setRepeatNumber("1")
-                .setFeeTotal("11000")
-                .setCoveredPatientFee("1000")
-                .setCoveredInsuranceFee("10000")
-                .setCoveredPatientAllFee("0")
-                .setUncoveredChosenFee("0")
-                .setUncoveredUnchosenFee("0"));
-        receiptBuilder.addFeeItems(FeeItem.newBuilder()
-                .setFeeItemName("검사료")
-                .setFeeItemCode("")
-                .setTreatmentDate("2018-12-06")
-                .setCoveredType("")
-                .setMedicalChargeCode("BB157")
-                .setPrice("20000")
-                .setQuantity("1")
-                .setRepeatNumber("1")
-                .setFeeTotal("20000")
-                .setCoveredPatientFee("0")
-                .setCoveredInsuranceFee("0")
-                .setCoveredPatientAllFee("0")
-                .setUncoveredChosenFee("20000")
-                .setUncoveredUnchosenFee("0"));
-
-        /*** Bill.Diagnoses ***/
-        Diagnosis.Builder diagnosisBuilder1 = Diagnosis.newBuilder();
-        diagnosisBuilder1.setDiagnosisCodeVersion("ICD-10-2016");
-        diagnosisBuilder1.setDiagnosisCodeType(10); // 주상병
-        diagnosisBuilder1.setDiagnosisCode("J00");
-
-        Diagnosis.Builder diagnosisBuilder2 = Diagnosis.newBuilder();
-        diagnosisBuilder2.setDiagnosisCodeVersion("KCD-7");
-        diagnosisBuilder2.setDiagnosisCodeType(20); // 부상병
-        diagnosisBuilder2.setDiagnosisCode("J30.3");
-
-        Claim.Builder partialClaim = claimBuilder
-                .addReceipts(receiptBuilder)
-                .addDiagnoses(diagnosisBuilder1)
-                .addDiagnoses(diagnosisBuilder2);
-
-        return ClaimDataV1Utils.fillClaim(partialClaim);
+        return new Bill("20181204-S1284", receipts, feeDetail, diagnoses);
     }
 }
