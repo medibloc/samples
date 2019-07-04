@@ -12,37 +12,59 @@ public class Bill {
         String receiptIssueDate;
         String patientNo;
         String patientName;
-        String companyRegistrationNo;
         String treatmentStartDate;
         String treatmentEndDate;
-        String treatmentDepartment;
+        String treatmentTimeType;
         String treatmentDepartmentCode;
-        String coveredFee;
-        String uncoveredFee;
+        String treatmentDepartmentName;
+        String dgrNo;
+        String room;
+        String patientTypeCode;
+        String patientType;
+        String coveredPatientFeeTotal;
+        String coveredInsuranceFeeTotal;
+        String coveredPatientAllFeeTotal;
+        String coveredFeeTotal;
+        String uncoveredChosenFeeTotal;
+        String uncoveredUnchosenFeeTotal;
+        String uncoveredFeeTotal;
         String upperLimitExcess;
         String payTotal;
         String patientPayTotal;
-        String deductAmount;
         String advancePayAmount;
         String payAmount;
+        String cardPaidAmount;
+        String cashReceiptPaidAmount;
+        String cashPaidAmount;
+        String paidAmountTotal;
         String uncollectedPayAmount;
-        String receiptAmount;
-        String surtaxAmount;
-        String cashPayAmount;
-        String cardPayAmount;
-        String insuranceType;
-        String insuranceName;
+        String cashReceiptInfo;
+        String cashReceiptApprovalNo;
+        String idConfirmNo;
+        String hospitalType;
+        String companyRegistrationNo;
+        String hospitalName;
+        String hospitalPhoneNo;
+        String hospitalAddress;
+        String hospitalRepresentative;
         ReceiptItem[] receiptItems;
+        ReceiptEtcItem[] receiptEtcItems;
     }
 
     public class ReceiptItem {
-        String receiptItemName;
         String receiptItemCode;
+        String receiptItemName;
         String coveredPatientFee;
         String coveredInsuranceFee;
         String coveredPatientAllFee;
         String uncoveredChosenFee;
         String uncoveredUnchosenFee;
+    }
+
+    public class ReceiptEtcItem {
+        String receiptEtcItemCode;
+        String receiptEtcItemName;
+        String receiptEtcItemContent;
     }
 
     public class FeeDetail {
@@ -52,20 +74,26 @@ public class Bill {
         String treatmentEndDate;
         String room;
         String patientType;
+        String memo;
         String amount;
         String adjustAmount;
         String totalAmount;
-        String companyName;
+        String requester;
+        String requesterRelationType;
+        String hospitalName;
         String companyRegistrationNo;
         FeeItem[] feeItems;
     }
 
     public class FeeItem {
-        String feeItemName;
         String feeItemCode;
+        String feeItemName;
         String treatmentDate;
-        String claimCode;
-        String claimName;
+        String medicalChargeCode;
+        String medicalChargeName;
+        String treatmentName;
+        String ediCode;
+        String ediName;
         String unitCost;
         String quantity;
         String repeatNumber;
