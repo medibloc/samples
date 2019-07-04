@@ -102,7 +102,7 @@ public class Insurer {
         }
 
         // 인증 만료일 확인
-        if (System.currentTimeMillis() > certification.getExpireTime()) {
+        if (System.currentTimeMillis() < certification.getExpireTime()) {
             throw new RuntimeException("The certificate is expired.");
         }
 
