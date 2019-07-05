@@ -1,5 +1,6 @@
 package org.medibloc.hospital_java_ko;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.medibloc.hospital_java_ko.entities.Bill;
 import org.medibloc.hospital_java_ko.entities.Certification;
 import org.medibloc.panacea.core.protobuf.Rpc;
@@ -39,6 +40,8 @@ public class Main {
 
         // 병원이 청구서, signed tx 생성하여 사용자(환자)에게 전달
         Bill bill = hospital.getBill(user.getAddress());
+        System.out.println("병원 - 영수증을 생성 하였습니다. jsonBill: " + new ObjectMapper().writeValueAsString(bill));
+
         Rpc.SendTransactionRequest claimTransactionRequest = hospital.getSignedTransaction(bill);
         String txHash = hospital.sendClaim(claimTransactionRequest);
         System.out.println("병원 - 환자의 진료 청구서에 sign 하였습니다. txHash: " + txHash);
