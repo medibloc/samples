@@ -2,10 +2,12 @@ package org.medibloc.insurance_java_ko.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class ClaimRequest {
     String insuranceCode;   // 보험 계약 코드
