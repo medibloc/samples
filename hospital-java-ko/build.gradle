@@ -24,5 +24,4 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:2.9.8"
 
     implementation "org.medibloc.panacea:core:0.1.8"
-    implementation "org.medibloc.phr:phr:0.1.8"
 }

@@ -1,9 +1,8 @@
 package org.medibloc.hospital_java_ko;
 
+import org.medibloc.hospital_java_ko.entities.Bill;
+import org.medibloc.hospital_java_ko.entities.Certification;
 import org.medibloc.panacea.core.protobuf.Rpc;
-import org.medibloc.phr.CertificateDataV1.Certificate;
-import org.medibloc.phr.CertificateDataV1.Certification;
-import org.medibloc.phr.ClaimDataV1.Claim;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -12,17 +11,17 @@ public class Main {
 
         // 사용자 본인인증 수행
         User user = new User();
-        Certification.Builder certificationBuilder = user.certify();
+        Certification incompleteCertification = user.certify();
         System.out.println("사용자 - 본인인증을 수행 하였습니다.");
 
         // 본인인증 결과를 블록체인에 기록
-        Certificate certificate = mediBloc.generateCertificate(user.getAddress(), certificationBuilder);
-        String certificateTxHash = mediBloc.sendCertificate(certificate);
+        Certification certification = mediBloc.generateCertificate(user.getAddress(), incompleteCertification);
+        String certificateTxHash = mediBloc.sendCertificate(certification);
         System.out.println("MediBloc - 사용자의 본인인증 결과를 블록체인에 기록 하였습니다.");
         System.out.println("           transaction 조회: https://stg-testnet-node.medibloc.org/v1/transaction?hash=" + certificateTxHash);
 
         // MediBloc 이 사용자에게 인증서, tx hash 반환
-        user.setCertificate(certificate);
+        user.setCertificate(certification);
         user.setCertificateTxHash(certificateTxHash);
 
         Thread.sleep(5000);
@@ -39,12 +38,12 @@ public class Main {
         System.out.println("병원 - 환자 로그인을 완료 하였습니다. token: " + user.getToken());
 
         // 병원이 청구서, signed tx 생성하여 사용자(환자)에게 전달
-        Claim claim = hospital.getClaim(user.getAddress(), user.getToken());
-        Rpc.SendTransactionRequest claimTransactionRequest = hospital.getSignedTransaction(claim);
+        Bill bill = hospital.getBill(user.getAddress());
+        Rpc.SendTransactionRequest claimTransactionRequest = hospital.getSignedTransaction(bill);
         String txHash = hospital.sendClaim(claimTransactionRequest);
         System.out.println("병원 - 환자의 진료 청구서에 sign 하였습니다. txHash: " + txHash);
 
-        user.setClaim(claim);
+        user.setBill(bill);
         user.setClaimTxRequest(claimTransactionRequest);
     }
 }

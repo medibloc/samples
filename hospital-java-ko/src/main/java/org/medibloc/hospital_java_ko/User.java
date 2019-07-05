@@ -1,13 +1,12 @@
 package org.medibloc.hospital_java_ko;
 
+import org.medibloc.hospital_java_ko.entities.Bill;
+import org.medibloc.hospital_java_ko.entities.Certification;
 import org.medibloc.panacea.account.Account;
 import org.medibloc.panacea.account.AccountUtils;
 import org.medibloc.panacea.core.protobuf.Rpc;
 import org.medibloc.panacea.crypto.ECKeyPair;
 import org.medibloc.panacea.crypto.Sign;
-import org.medibloc.phr.CertificateDataV1.Certificate;
-import org.medibloc.phr.CertificateDataV1.Certification;
-import org.medibloc.phr.ClaimDataV1.Claim;
 
 import java.math.BigInteger;
 
@@ -22,12 +21,12 @@ public class User {
     private Account account;
     private String residentRegistrationNumber = "750101-1234567";
 
-    private Certificate certificate;
+    private Certification certification;
     private String certificateTxHash;
 
     private String token;
 
-    private Claim claim;
+    private Bill bill;
     private Rpc.SendTransactionRequest claimTxRequest;
 
     public User() throws Exception {
@@ -45,12 +44,12 @@ public class User {
         return this.residentRegistrationNumber;
     }
 
-    public void setCertificate(Certificate certificate) {
-        this.certificate = certificate;
+    public void setCertificate(Certification certification) {
+        this.certification = certification;
     }
 
-    public Certificate getCertificate() {
-        return this.certificate;
+    public Certification getCertificate() {
+        return this.certification;
     }
 
     public void setCertificateTxHash(String certificateTxHash) {
@@ -69,24 +68,24 @@ public class User {
         this.token = token;
     }
 
-    public void setClaim(Claim claim) {
-        this.claim = claim;
+    public void setBill(Bill bill) {
+        this.bill = bill;
     }
 
     public void setClaimTxRequest(Rpc.SendTransactionRequest claimTxRequest) {
         this.claimTxRequest = claimTxRequest;
     }
 
-    public Certification.Builder certify() {
-        return Certification.newBuilder()
-                .setCertificationResult("success")
-                .setPersonName("홍길동")
-                .setPersonBirthdate("19750101")
-                .setPersonGender("1")
-                .setPersonNation("0")
-                .setPersonCi("136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2")
-                .setPersonMobileCompany("ABC")
-                .setPersonMobileNumber("01012345678");
+    public Certification certify() {
+        return new Certification(
+                null
+                , -1
+                , "홍길동"
+                , "19750101"
+                , 1
+                , "136a78e6v7awe8arw71ver89es17vr8a9ws612vr78es1vr7a8691v7res74164sa7ver68asv6sb87r9h6tg9a2"
+                , 1 // SKT
+                , "01012345678");
     }
 
     /**
