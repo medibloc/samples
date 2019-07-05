@@ -9,9 +9,9 @@ import lombok.Setter;
 public class ReceiptItem {
     String receiptItemCode;
     String receiptItemName;
-    String coveredPatientFee;
-    String coveredInsuranceFee;
-    String coveredPatientAllFee;
-    String uncoveredChosenFee;
-    String uncoveredUnchosenFee;
+    int coveredPatientFee;
+    int coveredInsuranceFee;
+    int coveredPatientAllFee;
+    int uncoveredChosenFee;
+    int uncoveredUnchosenFee;
 }

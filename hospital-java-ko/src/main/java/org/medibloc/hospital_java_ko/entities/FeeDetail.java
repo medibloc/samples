@@ -11,17 +11,18 @@ import java.util.List;
 public class FeeDetail {
     String patientNo;
     String patientName;
-    String treatmentStartDate;
-    String treatmentEndDate;
+    long treatmentStartDate;
+    long treatmentEndDate;
     String room;
+    String patientTypeCode;
     String patientType;
     String memo;
-    String amount;
-    String adjustAmount;
-    String totalAmount;
+    int amount;
+    int adjustAmount;
+    int totalAmount;
     String requester;
     String requesterRelationType;
-    String hospitalName;
     String companyRegistrationNo;
+    String hospitalName;
     List<FeeItem> feeItems;
 }
