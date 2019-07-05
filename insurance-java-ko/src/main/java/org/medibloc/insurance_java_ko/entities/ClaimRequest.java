@@ -21,6 +21,6 @@ public class ClaimRequest {
     String informType;      // 보험청구 진행 알림 방법
     boolean isMedicalCareRecipient; // 의료급여 수급권자 여부
     int medicalCareRecipientType;   // 의료급여 수급권자 구분
-    String claimTxHash;     // 청구 데이터 transaction hash
+    String billTxHash;     // 청구 데이터 transaction hash
     Bill bill;              // 청구 데이터
 }

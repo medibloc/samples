@@ -135,7 +135,7 @@ public class Insurer {
         String jsonClaimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
         ClaimRequest claimRequest = new ObjectMapper().readValue(jsonClaimRequest, ClaimRequest.class);
 
-        if (isUploadedOnBlockchain(claimRequest.getBill(), claimRequest.getClaimTxHash()) != true) {
+        if (isUploadedOnBlockchain(claimRequest.getBill(), claimRequest.getBillTxHash()) != true) {
             throw new RuntimeException("주어진 청구 정보가 해당 transaction 에 기록 되어 있지 않습니다.");
         }
 
