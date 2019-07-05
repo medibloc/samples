@@ -151,7 +151,7 @@ public class Insurer {
 
     /**
      * txHash 로 블록체인에서 transaction 을 조회 하고,
-     * 조회 한 transaction 에 기록 된 hash 값과 주어진 인증서의 hash 값이 일치 하는 지 여부를 반환 합니다.
+     * 조회 한 transaction 에 기록 된 hash 값과 주어진 data 의 hash 값이 일치 하는 지 여부를 반환 합니다.
      */
     private boolean isUploadedOnBlockchain(Object data, String txHash) throws JsonProcessingException{
         String jsonData = new ObjectMapper().writeValueAsString(data);
