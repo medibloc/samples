@@ -81,15 +81,13 @@ public class User {
 
     public String getEncryptedAccidentDate(String insurerBlockchainAddress) throws Exception {
         // claim data 에 해당하는 사고일(청구데이터 중 최초진료일)
-        String accidentDate = "99999999";
+        long accidentDate = Long.MAX_VALUE;
         for (Receipt receipt : getBill().getReceipts()) {
-            if (receipt.getTreatmentStartDate().compareTo(accidentDate) < 0) {
-                accidentDate = receipt.getTreatmentStartDate();
-            }
+            accidentDate = Math.min(accidentDate, receipt.getTreatmentStartDate());
         }
 
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), insurerBlockchainAddress);
-        return AES256CTR.encryptData(sharedSecretKey, accidentDate);
+        return AES256CTR.encryptData(sharedSecretKey, String.valueOf(accidentDate));
     }
 
     /* '사고내용 + 청구서' 를 암호화 하여 반환 합니다. */
@@ -119,66 +117,75 @@ public class User {
         /* Bill.Receipts.ReceiptItems */
         List<ReceiptItem> receiptItems = new ArrayList<ReceiptItem>();
         receiptItems.add(new ReceiptItem(
-                null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
+                "L01"
+                , "진찰료"
+                , 1000
+                , 10000
+                , 0
+                , 0
+                , 0
+        ));
+        receiptItems.add(new ReceiptItem(
+                "L09"
+                , "검사료"
+                , 0
+                , 0
+                , 0
+                , 20000
+                , 0
         ));
 
         /* Bill.Receipts.ReceiptEtcItems */
         List<ReceiptEtcItem> receiptEtcItems = new ArrayList<ReceiptEtcItem>();
         receiptEtcItems.add(new ReceiptEtcItem(
-           null
-                , null
-                , null
+                "D01"
+                , "헌혈감면액"
+                , "0"
         ));
 
         /* Bill.Receipts */
         List<Receipt> receipts = new ArrayList<Receipt>();
         receipts.add(new Receipt(
-                null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
+                "20190701-S1284"
+                , "O"
+                , 1561953600000L // 2019-07-01 13:00
+                , "12345678"
+                , "홍길동"
+                , 1561939200000L // 2019-07-01
+                , 1561939200000L // 2019-07-01
+                , "0"
+                , "DER"
+                , "피부과"
+                , ""
+                , ""
+                , "11"
+                , "국민건강보험"
+                , 1000
+                , 10000
+                , 0
+                , 11000
+                , 20000
+                , 0
+                , 20000
+                , 0
+                , 31000
+                , 21000
+                , 6000
+                , 15000
+                , 15000
+                , 0
+                , 0
+                , 15000
+                , 0
+                , ""
+                , ""
+                , ""
+                , "4"
+                , "123-1234567"
+                , "삼성서울병원"
+                , "02-111-2222"
+                , "서울시"
+                , ""
                 , receiptItems
                 , receiptEtcItems
         ));
@@ -186,44 +193,66 @@ public class User {
         /* Bill.FeeDetail.FeeItems */
         List<FeeItem> feeItems = new ArrayList<FeeItem>();
         feeItems.add(new FeeItem(
-                null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
+                "L01"
+                , "진찰료"
+                , 1561939200000L
+                , ""
+                , ""
+                , "초진 진찰료"
+                , ""
+                , ""
+                , 1
+                , 1
+                , 1
+                , 1
+                , 11000
+                , 1000
+                , 10000
+                , 0
+                , 0
+                , 0
+                , 0
+        ));
+        feeItems.add(new FeeItem(
+                "L09"
+                , "검사료"
+                , 1561939200000L
+                , ""
+                , ""
+                , "검사료"
+                , ""
+                , ""
+                , 1
+                , 1
+                , 1
+                , 1
+                , 20000
+                , 0
+                , 0
+                , 0
+                , 0
+                , 0
+                , 20000
         ));
 
         /* Bill.FeeDetail */
         FeeDetail feeDetail = new FeeDetail(
-                null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
-                , null
+                "L09"
+                , "홍길동"
+                , 1561939200000L
+                , 1561939200000L
+                , ""
+                , "11"
+                , "국민건강보험"
+                , ""
+                , 31000
+                , 0
+                , 31000
+                , ""
+                , ""
+                , "123-1234567"
+                , "삼성서울병원"
+                , feeItems
         );
 
         /* Bill.diagnoses */
