@@ -1,7 +1,5 @@
 package org.medibloc.hospital_java_ko;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Hospital {
-    private static final String JWT_SECRET_KEY = "medibloc_hospital_secret_key";
-    private static final String JWT_ISSUER = "hospital";
-
     private static final String BLOCKCHAIN_URL = "https://stg-testnet-node.medibloc.org";
     private static final String ACCOUNT_REQUEST_TYPE_TAIL = "tail";
 
@@ -114,37 +109,6 @@ public class Hospital {
             patient.setBlockchainAddress(blockchainAddress);
         } else {
             throw new RuntimeException("주민등록번호가 " + residentRegistrationNumber + " 인 환자 정보를 찾을 수 없습니다.");
-        }
-    }
-
-    /**
-     * 로그인 시 환자가 사용할 nonce 값을 생성하여 반환 합니다.
-     * 이후 환자가 nonce 값에 서명한 결과를 검증 하기 위해, 환자에게 전달한 nonce 값을 저장 합니다.
-     */
-    public String getSignInNonce(String patientBlockchainAddress) {
-        Patient patient = findPatientWithBlockchainAddress(patientBlockchainAddress);
-
-        String nonce = Numeric.byteArrayToHex(SecureRandomUtils.generateRandomBytes(32));
-        patient.setNonce(nonce);
-
-        return nonce;
-    }
-
-    /**
-     * 환자가 nonce 값에 서명한 결과를 검증 하고, 검증에 성공했다면 JWT(Json Web Token) 를 반환 합니다.
-     * 환자는 이 함수를 호출하여 받은 JWT 를 이후 병원과 통신 시 사용 합니다.
-     */
-    public String getSignInToken(String patientBlockchainAddress, String signature) {
-        Patient patient = findPatientWithBlockchainAddress(patientBlockchainAddress);
-
-        boolean isValidSig = Sign.verifySignature(patientBlockchainAddress, patient.getNonce(), signature);
-
-        if (isValidSig) {
-            Algorithm algorithm = Algorithm.HMAC256(JWT_SECRET_KEY);
-            String jwt = JWT.create().withIssuer(JWT_ISSUER).sign(algorithm);
-            return jwt;
-        } else {
-            throw new IllegalArgumentException(patientBlockchainAddress + "의 nonce 값에 대한 signature 가 올바르지 않습니다.");
         }
     }
 

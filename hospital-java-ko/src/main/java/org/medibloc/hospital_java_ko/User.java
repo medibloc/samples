@@ -87,16 +87,4 @@ public class User {
                 , 1 // SKT
                 , "01012345678");
     }
-
-    /**
-     * 병원에 로그인 합니다.
-     */
-    public void signIn(Hospital hospital) {
-        // 병원에서 nonce 를 전달받아 개인키로 서명합니다.
-        String nonce = hospital.getSignInNonce(this.account.getAddress());
-        String signature = Sign.signMessage(nonce, ecKeyPair);
-
-        // 서명값을 병원에 전달하여 로그인을 완료하고 token 을 전달 받습니다.
-        this.setToken(hospital.getSignInToken(this.account.getAddress(), signature));
-    }
 }
