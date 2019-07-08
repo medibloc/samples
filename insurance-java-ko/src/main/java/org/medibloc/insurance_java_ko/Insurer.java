@@ -1,6 +1,7 @@
 package org.medibloc.insurance_java_ko;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 import org.medibloc.insurance_java_ko.entities.*;
@@ -154,7 +155,9 @@ public class Insurer {
      * 조회 한 transaction 에 기록 된 hash 값과 주어진 data 의 hash 값이 일치 하는 지 여부를 반환 합니다.
      */
     private boolean isUploadedOnBlockchain(Object data, String txHash) throws JsonProcessingException{
-        String jsonData = new ObjectMapper().writeValueAsString(data);
+        String jsonData = new ObjectMapper()
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .writeValueAsString(data);
         BlockChain.AddRecordPayload dataHashPayload = BlockChain.AddRecordPayload.newBuilder()
                 .setHash(ByteString.copyFrom(Hash.sha3256(jsonData.getBytes())))
                 .build();
