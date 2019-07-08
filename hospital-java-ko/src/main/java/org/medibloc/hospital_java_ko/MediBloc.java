@@ -1,5 +1,6 @@
 package org.medibloc.hospital_java_ko;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.medibloc.hospital_java_ko.entities.Certification;
 import org.medibloc.panacea.account.Account;
@@ -47,7 +48,9 @@ public class MediBloc {
     public String sendCertificate(Certification certification) throws Exception {
         Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
 
-        String jsonCertification = new ObjectMapper().writeValueAsString(certification);
+        String jsonCertification = new ObjectMapper()
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .writeValueAsString(certification);
         System.out.println("MediBloc - 사용자의 본인인증 결과 json: " + jsonCertification);
 
         byte[] certificateHash = Hash.sha3256(jsonCertification.getBytes());

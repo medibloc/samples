@@ -3,6 +3,7 @@ package org.medibloc.hospital_java_ko;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 import org.medibloc.hospital_java_ko.entities.*;
@@ -324,7 +325,9 @@ public class Hospital {
         Panacea panacea = Panacea.create(new HttpService(BLOCKCHAIN_URL));
 
         // Blockchain 에 업로드 할 bill hash 값을 구합니다.
-        String jsonBill = new ObjectMapper().writeValueAsString(bill);
+        String jsonBill = new ObjectMapper()
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .writeValueAsString(bill);
         byte[] billHash = Hash.sha3256(jsonBill.getBytes());
 
         // Blockchain 에서 병원 account 의 현재 정보를 조회 합니다.
@@ -365,7 +368,9 @@ public class Hospital {
      * 조회 한 transaction 에 기록 된 hash 값과 주어진 data 의 hash 값이 일치 하는 지 여부를 반환 합니다.
      */
     private boolean isUploadedOnBlockchain(Object data, String txHash) throws JsonProcessingException {
-        String jsonData = new ObjectMapper().writeValueAsString(data);
+        String jsonData = new ObjectMapper()
+                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+                .writeValueAsString(data);
         BlockChain.AddRecordPayload dataHashPayload = BlockChain.AddRecordPayload.newBuilder()
                 .setHash(ByteString.copyFrom(Hash.sha3256(jsonData.getBytes())))
                 .build();
