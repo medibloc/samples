@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bill {
-    String billNo;
+    String billId;
     List<Receipt> receipts;
     FeeDetail feeDetail;
     List<Diagnosis> diagnoses;
