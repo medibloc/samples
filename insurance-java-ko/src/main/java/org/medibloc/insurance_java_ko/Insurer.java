@@ -118,7 +118,7 @@ public class Insurer {
 
     public List<InsuranceEntity> getInsuranceList(String userBlockchainAddress, String encryptedAccidentDate) throws Exception {
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), userBlockchainAddress);
-        String accidentDate = AES256CTR.decryptData(sharedSecretKey, encryptedAccidentDate);
+        String accidentDate = new String(AES256CTR.decryptData(sharedSecretKey, encryptedAccidentDate));
         System.out.println("보험사 - 사고일 당시의 계약 건을 조회합니다. 복호화 한 사고일: " + accidentDate);
 
         // 블록체인 주소로 사용자를 조회하여, 해당 사용자의 사고일 당시 계약 건을 반환 합니다.
@@ -133,7 +133,7 @@ public class Insurer {
 
     public ClaimResponse sendClaim(String userBlockchainAddress, String encryptedClaimRequest) throws Exception {
         String sharedSecretKey = Keys.getSharedSecretKey(getPrivateKey(), userBlockchainAddress);
-        String jsonClaimRequest = AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest);
+        String jsonClaimRequest = new String(AES256CTR.decryptData(sharedSecretKey, encryptedClaimRequest));
         ClaimRequest claimRequest = new ObjectMapper().readValue(jsonClaimRequest, ClaimRequest.class);
 
         if (isUploadedOnBlockchain(claimRequest.getBill(), claimRequest.getBillTxHash()) != true) {

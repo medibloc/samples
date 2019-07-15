@@ -23,4 +23,5 @@ dependencies {
 
     // panacea
     implementation "org.medibloc.panacea:panacea-core:1.0.3"
+    implementation "org.medibloc.panacea:panacea-crypto:1.0.4"
 }
